@@ -52,6 +52,7 @@ curr.execute("""CREATE TABLE IF NOT EXISTS users_has_skills (
 
 curr.execute("""CREATE TABLE IF NOT EXISTS posts (
     id SERIAL PRIMARY KEY,
+    
     title VARCHAR(255) NOT NULL,
     creatorId INT NOT NULL,         
     privacy VARCHAR(255),

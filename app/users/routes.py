@@ -84,13 +84,42 @@ def updateUserSkills(userId):
         return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
 
     request_data = request.get_json()
-    updateUserSkillsDto = {
-        "skills": request_data['skills'],
-    }
+    # updateUserSkillsDto = {
+    #     "skills": request_data['skills'],
+    # }
+    skillIds = request_data['skills']
 
     curr.execute("""DELETE FROM users_has_skills WHERE userId = {0}""".format(userId))
     
-    insertUserSkillQuery = generateInsertUserSkillQuery(userId, updateUserSkillsDto)
+    insertUserSkillQuery = generateInsertUserSkillQuery(userId, skillIds)
+    curr.execute(insertUserSkillQuery)
+    conn.commit()
+    
+    curr.execute("""SELECT * FROM users_has_skills WHERE userId = {0}""".format(userId))
+    
+    userSkillDataModels = curr.fetchall()
+    skillsReponseDto = FromUserSkillDataModelsToSkillsResponseDto(userSkillDataModels)
+
+    return json.dumps({"message": "update skills success", "skills":skillsReponseDto}), 200, {'ContentType':'application/json'}
+
+
+@bp.route('/<userId>/posts', methods=['PUT'])
+def updateUserSkills(userId):
+    
+    curr.execute("""SELECT * FROM users WHERE Id = {0}""".format(userId))
+    userDataModel = curr.fetchone()
+    if userDataModel is None:
+        return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
+
+    request_data = request.get_json()
+    # updateUserSkillsDto = {
+    #     "skills": request_data['skills'],
+    # }
+    skillIds = request_data['skills']
+
+    curr.execute("""DELETE FROM users_has_skills WHERE userId = {0}""".format(userId))
+    
+    insertUserSkillQuery = generateInsertUserSkillQuery(userId, skillIds)
     curr.execute(insertUserSkillQuery)
     conn.commit()
     

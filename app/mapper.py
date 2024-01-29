@@ -19,6 +19,13 @@ def FromUserSkillDataModelsToSkillsResponseDto(userSkillDataModels: list[tuple[A
     
     return skillIds
 
+def FromPostSkillDataModelsToSkillsResponseDto(postSkillDataModels: list[tuple[Any, ...]]):
+    skillIds = []
+    for postSkillDataModel in postSkillDataModels:
+        skillIds.append(postSkillDataModel[2])
+    
+    return skillIds
+
 def FromPostDataModelToPostResponseDto(postDataModel: tuple[Any, ...]):
     
     postDto = {
@@ -48,10 +55,26 @@ def FromPostResponseDtoToElasticSearchModel(postReponseDto):
         postContent = postContent + "Dataset Information: " + postReponseDto["datasetProjectInformation"]
     if postReponseDto["timelineProjectInformation"] is not None:
         postContent = postContent + "Project Timeline: " + postReponseDto["timelineProjectInformation"]
-    
+    if postReponseDto["skills"] is not None and len(postReponseDto["skills"]) > 0:
+        skillsContent = ""
+        for skill in postReponseDto["skills"]:
+            skillsContent = skillsContent + skill["skillName"] + ", "
+        postContent = postContent + "Skills: " + skillsContent[:-2] + "."
+
     return {
         'content' : postContent,
         'meta' : {
             'id' : str(postReponseDto['id'])
         }
     }
+
+def FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels: list[tuple[Any, ...]]):
+    skillIds = []
+    for postSkillJoinSkillDataModel in postSkillJoinSkillDataModels:
+        print(postSkillJoinSkillDataModel)
+        skillIds.append({
+            'id': postSkillJoinSkillDataModel[3],
+            'skillName': postSkillJoinSkillDataModel[4],
+        })
+    
+    return skillIds

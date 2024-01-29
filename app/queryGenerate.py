@@ -1,4 +1,7 @@
 
+from typing import List
+
+
 def generateInsertUserQuery(createUserDto):
     prefixQuery = "INSERT INTO users ("
     postfixQuery = ") VALUES ("
@@ -10,10 +13,10 @@ def generateInsertUserQuery(createUserDto):
 
     return query
 
-def generateInsertUserSkillQuery(userId, updateUserSkillsDto):
+def generateInsertUserSkillQuery(userId, skillIds):
     prefixQuery = "INSERT INTO users_has_skills (userId,skillId) VALUES "
     postfixQuery = ""
-    for skillId in updateUserSkillsDto["skills"]:
+    for skillId in skillIds:
         postfixQuery = postfixQuery + "({0},{1})".format(userId,skillId) + ", "
     
     query = prefixQuery + postfixQuery[:-2]
@@ -31,5 +34,15 @@ def generateInsertPostQuery(createPostDto):
             postfixQuery = postfixQuery + "'{0}'".format(createPostDto[key]) + ", "
     
     query = prefixQuery[:-2] + postfixQuery[:-2] + ")"
+
+    return query
+
+def generateInsertPostSkillQuery(postId, skillIds: List[any]):
+    prefixQuery = "INSERT INTO posts_has_skills (postId,skillId) VALUES "
+    postfixQuery = ""
+    for skillId in skillIds:
+        postfixQuery = postfixQuery + "({0},{1})".format(postId,skillId) + ", "
+    
+    query = prefixQuery + postfixQuery[:-2]
 
     return query
