@@ -59,10 +59,10 @@ curr.execute("""CREATE TABLE IF NOT EXISTS posts (
     projectLink VARCHAR(255),
     contactEmail VARCHAR(255),
 
-    objectivesProjectInformation VARCHAR(255),
-    methodologyProjectInformation VARCHAR(255),
-    datasetProjectInformation VARCHAR(255),
-    timelineProjectInformation VARCHAR(255),
+    objectivesProjectInformation VARCHAR(500),
+    methodologyProjectInformation VARCHAR(500),
+    datasetProjectInformation VARCHAR(500),
+    timelineProjectInformation VARCHAR(500),
              
     CONSTRAINT fk_creator
       FOREIGN KEY(creatorId) 

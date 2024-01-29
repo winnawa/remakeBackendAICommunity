@@ -29,8 +29,29 @@ def FromPostDataModelToPostResponseDto(postDataModel: tuple[Any, ...]):
         "status": postDataModel[4],
         "projectLink": postDataModel[5],
         "contactEmail": postDataModel[6],
-        "methodologyProjectInformation": postDataModel[7],
-        "datasetProjectInformation": postDataModel[8],
-        "timelineProjectInformation": postDataModel[9]
+        "objectivesProjectInformation": postDataModel[7],
+        "methodologyProjectInformation": postDataModel[8],
+        "datasetProjectInformation": postDataModel[9],
+        "timelineProjectInformation": postDataModel[10]
     }
     return postDto 
+
+def FromPostResponseDtoToElasticSearchModel(postReponseDto):
+    postContent = ""
+    if postReponseDto["title"] is not None:
+        postContent = postContent + "Project Title: " + postReponseDto["title"] + "."
+    if postReponseDto["objectivesProjectInformation"] is not None:
+        postContent = postContent + "Project Objectives: " + postReponseDto["objectivesProjectInformation"]
+    if postReponseDto["methodologyProjectInformation"] is not None:
+        postContent = postContent + "Project Methodology: " + postReponseDto["methodologyProjectInformation"]
+    if postReponseDto["datasetProjectInformation"] is not None:
+        postContent = postContent + "Dataset Information: " + postReponseDto["datasetProjectInformation"]
+    if postReponseDto["timelineProjectInformation"] is not None:
+        postContent = postContent + "Project Timeline: " + postReponseDto["timelineProjectInformation"]
+    
+    return {
+        'content' : postContent,
+        'meta' : {
+            'id' : str(postReponseDto['id'])
+        }
+    }

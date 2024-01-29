@@ -1,9 +1,10 @@
-from app.mapper import FromPostDataModelToPostResponseDto
+from app.mapper import FromPostDataModelToPostResponseDto, FromPostResponseDtoToElasticSearchModel
 from app.posts import bp
-from flask import request,Flask
+from flask import request
 import json
 from app.dataConnection import curr, conn
 from app.queryGenerate import generateInsertPostQuery
+from app.elasticSearchConnection import AutoMatching
 
 @bp.route('/', methods=['POST'])
 def createPost():
@@ -19,5 +20,9 @@ def createPost():
     curr.execute("""SELECT * FROM posts WHERE title = '{0}' """.format(createPostDto["title"]))
     postDataModel = curr.fetchone()
     postReponseDto = FromPostDataModelToPostResponseDto(postDataModel)
+
+    postElasticSearchModel = FromPostResponseDtoToElasticSearchModel(postReponseDto)
+    AutoMatching.indexNewData([postElasticSearchModel])
+    AutoMatching.updateEmbeddingNewData()
 
     return json.dumps({"message": "create post success", "post":postReponseDto}), 200, {'ContentType':'application/json'}

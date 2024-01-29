@@ -13,5 +13,3 @@ conn = psycopg2.connect(
 curr = conn.cursor()
 
 
-# data = curr.execute("""SELECT * FROM users WHERE username = 'namkhoa1" """)
-# print(curr.fetchall())
