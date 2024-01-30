@@ -1,4 +1,4 @@
-from app.elasticSearchConnection import AutoMatching
+# from app.elasticSearchConnection import AutoMatching
 from app.queryGenerate import generateFindPostsByIdsQueryString, generateInsertUserQuery, generateInsertUserSkillQuery
 from app.users import bp
 from flask import request
@@ -126,9 +126,10 @@ def getPostsByQuery(userId):
     }
 
     contextQuery = ""
+    documents = []
     if isConsideringUserContext:
         contextQuery = FromUserContextDataToSystemContextQuery(userContextData)
-    documents = AutoMatching.searchDocuments(queryString, contextQuery)
+    # documents = AutoMatching.searchDocuments(queryString, contextQuery)
 
     postIds = [int(document.meta['id']) for document in documents['documents']]
     
