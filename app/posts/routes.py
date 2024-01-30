@@ -1,4 +1,4 @@
-from app.mapper import FromPostDataModelToPostResponseDto, FromPostResponseDtoToElasticSearchModel, FromPostSkillDataModelsToSkillsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto
+from app.mapper import FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostResponseDtoToElasticSearchModel, FromPostSkillDataModelsToSkillsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto
 from app.posts import bp
 from flask import request
 import json
@@ -72,3 +72,22 @@ def updatePostSkills(postId):
 
     # need to implement the indexing after update skills   
     return json.dumps({"message": "update skills success", "skills":skillsReponseDto}), 200, {'ContentType':'application/json'}
+
+
+@bp.route('/', methods=['GET'])
+def getPosts():
+    page = int(request.args.get('page')) if request.args.get('page') is not None else 0
+    size = int(request.args.get('size')) if request.args.get('size') is not None else 10
+
+    curr.execute("""SELECT * FROM posts LIMIT 100""")
+    postsDataModels = curr.fetchall()
+
+    startPoint = page*size
+    endPoint = (page+1)*size if (page+1)*size < len(postsDataModels) else len(postsDataModels)
+    returnedPostsResponseDto = []
+    if startPoint < len(postsDataModels):
+        paginatedPostDataModels = [postsDataModels[i] for i in range(startPoint,endPoint)]
+        returnedPostsResponseDto = FromPostDataModelsToGetPostsResponseDto(paginatedPostDataModels)
+
+
+    return json.dumps({"message": "get posts success", "posts":returnedPostsResponseDto}), 200, {'ContentType':'application/json'}

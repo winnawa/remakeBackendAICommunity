@@ -46,3 +46,12 @@ def generateInsertPostSkillQuery(postId, skillIds: List[any]):
     query = prefixQuery + postfixQuery[:-2]
 
     return query
+
+def generateFindPostsByIdsQueryString(postIds):
+    prefixQuery = "SELECT * FROM posts WHERE id IN "
+    postfixQuery = "( "
+    for postId in postIds:
+        postfixQuery = postfixQuery + "{0}, ".format(postId)
+    query = prefixQuery + postfixQuery[:-2] + ")"
+
+    return query

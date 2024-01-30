@@ -1,9 +1,10 @@
-from app.queryGenerate import generateInsertUserQuery, generateInsertUserSkillQuery
+from app.elasticSearchConnection import AutoMatching
+from app.queryGenerate import generateFindPostsByIdsQueryString, generateInsertUserQuery, generateInsertUserSkillQuery
 from app.users import bp
 from flask import request
 import json
 from app.dataConnection import curr, conn
-from app.mapper import FromUserDataModelToUserResponseDto, FromUserSkillDataModelsToSkillsResponseDto
+from app.mapper import FromPostDataModelsToGetPostsResponseDto, FromUserContextDataToSystemContextQuery, FromUserDataModelToUserResponseDto, FromUserSkillDataModelsToSkillsResponseDto, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto
 
 @bp.route('/', methods=['POST'])
 def createUser():
@@ -103,29 +104,48 @@ def updateUserSkills(userId):
     return json.dumps({"message": "update skills success", "skills":skillsReponseDto}), 200, {'ContentType':'application/json'}
 
 
-@bp.route('/<userId>/posts', methods=['PUT'])
-def updateUserSkills(userId):
-    
+@bp.route('/<userId>/posts', methods=['GET'])
+def getPostsByQuery(userId):
+    queryString = request.args.get('queryString')
+    isConsideringUserContext = int(request.args.get('isConsideringUserContext')) == 1 #0 is false, 1 is true
+
     curr.execute("""SELECT * FROM users WHERE Id = {0}""".format(userId))
     userDataModel = curr.fetchone()
     if userDataModel is None:
         return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
-
-    request_data = request.get_json()
-    # updateUserSkillsDto = {
-    #     "skills": request_data['skills'],
-    # }
-    skillIds = request_data['skills']
-
-    curr.execute("""DELETE FROM users_has_skills WHERE userId = {0}""".format(userId))
     
-    insertUserSkillQuery = generateInsertUserSkillQuery(userId, skillIds)
-    curr.execute(insertUserSkillQuery)
-    conn.commit()
+    curr.execute("""SELECT * FROM users_has_skills AS UHS JOIN skills AS S ON UHS.skillId = S.id
+                  WHERE UHS.userId = {0}""".format(userId))
     
-    curr.execute("""SELECT * FROM users_has_skills WHERE userId = {0}""".format(userId))
+    userSkillJoinSkillDataModels = curr.fetchall()
+    userSkillsDetailReponseDto = FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto(userSkillJoinSkillDataModels)
     
-    userSkillDataModels = curr.fetchall()
-    skillsReponseDto = FromUserSkillDataModelsToSkillsResponseDto(userSkillDataModels)
+    # later on we can add attribute named "experience"
+    userContextData = {
+        "skills": userSkillsDetailReponseDto
+    }
 
-    return json.dumps({"message": "update skills success", "skills":skillsReponseDto}), 200, {'ContentType':'application/json'}
+    contextQuery = ""
+    if isConsideringUserContext:
+        contextQuery = FromUserContextDataToSystemContextQuery(userContextData)
+    documents = AutoMatching.searchDocuments(queryString, contextQuery)
+
+    postIds = [int(document.meta['id']) for document in documents['documents']]
+    
+    findPostsByIdsQueryString = generateFindPostsByIdsQueryString(postIds)
+
+    curr.execute(findPostsByIdsQueryString)
+    postDataModels = curr.fetchall()
+
+    getPostsResponseDto = FromPostDataModelsToGetPostsResponseDto(postDataModels)
+
+    sortedGetPostResponseDto= []
+    orderPrecedence = [x for x in postIds]
+    while len(orderPrecedence) > 0:
+        for post in getPostsResponseDto:
+            if post["id"] == orderPrecedence[0]:
+                sortedGetPostResponseDto.append(post)
+                orderPrecedence.pop(0)
+                break
+
+    return json.dumps({"message": "get posts success", "posts":sortedGetPostResponseDto}), 200, {'ContentType':'application/json'}
