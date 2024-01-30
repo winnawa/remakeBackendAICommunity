@@ -122,3 +122,13 @@ def FromPostDataModelsToGetPostsResponseDto(postDataModels: list[tuple[Any, ...]
         }
         posts.append(postDto)
     return posts
+
+def FromSkillDataModelsToGetSkillsResponseDto(skillDataModels):
+    skills = []
+    for skillDataModel in skillDataModels:
+        skillDto = {
+            "id": int(skillDataModel[0]),
+            "skillName": str(skillDataModel[1]),
+        }
+        skills.append(skillDto)
+    return skills

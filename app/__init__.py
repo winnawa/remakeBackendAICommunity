@@ -12,5 +12,7 @@ def create_app():
     app.register_blueprint(users_bp, url_prefix='/users')
     from app.posts import bp as posts_bp
     app.register_blueprint(posts_bp, url_prefix='/posts')
+    from app.skills import bp as skills_bp
+    app.register_blueprint(skills_bp,url_prefix='/skills')
 
     return app
