@@ -4,6 +4,7 @@ from flask_cors import CORS, cross_origin
 def create_app():
     app = Flask(__name__)
     CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
     # Register blueprints here
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
