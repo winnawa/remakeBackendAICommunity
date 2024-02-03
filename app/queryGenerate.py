@@ -23,6 +23,18 @@ def generateInsertUserSkillQuery(userId, skillIds):
 
     return query
 
+def generateInsertUserExperienceQuery(userId, experiences):
+    prefixQuery = "INSERT INTO experiences (userId,experienceDescription,timeline) VALUES "
+    postfixQuery = ""
+    for experience in experiences:
+        description = experience["experienceDescription"]
+        timeline = experience["timeline"]
+        postfixQuery = postfixQuery + "({0},'{1}','{2}')".format(userId, description, timeline) + ", "
+    
+    query = prefixQuery + postfixQuery[:-2]
+
+    return query
+
 def generateInsertPostQuery(createPostDto):
     prefixQuery = "INSERT INTO posts ("
     postfixQuery = ") VALUES ("
@@ -55,3 +67,30 @@ def generateFindPostsByIdsQueryString(postIds):
     query = prefixQuery + postfixQuery[:-2] + ")"
 
     return query
+
+def generateFindUsersByIdsQueryString(userIds):
+    prefixQuery = "SELECT * FROM users WHERE id IN "
+    postfixQuery = "( "
+    for userId in userIds:
+        postfixQuery = postfixQuery + "{0}, ".format(userId)
+    query = prefixQuery + postfixQuery[:-2] + ")"
+
+    return query
+
+# def generateFindSkillsByIdsQueryString(userIds):
+#     prefixQuery = "SELECT * FROM users WHERE id IN "
+#     postfixQuery = "( "
+#     for userId in userIds:
+#         postfixQuery = postfixQuery + "{0}, ".format(userId)
+#     query = prefixQuery + postfixQuery[:-2] + ")"
+
+#     return query
+
+# def generateFindUsersByIdsQueryString(userIds):
+#     prefixQuery = "SELECT * FROM users WHERE id IN "
+#     postfixQuery = "( "
+#     for userId in userIds:
+#         postfixQuery = postfixQuery + "{0}, ".format(userId)
+#     query = prefixQuery + postfixQuery[:-2] + ")"
+
+#     return query

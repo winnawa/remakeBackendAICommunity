@@ -1,5 +1,10 @@
 from typing import Any, List
 from app.models.user import User
+from enum import Enum
+
+class PostType(Enum):
+    project = '0'
+    userProfile = '1'
 
 def FromUserDataModelToUserResponseDto(userDataModel: tuple[Any, ...]):
     
@@ -64,8 +69,32 @@ def FromPostResponseDtoToElasticSearchModel(postReponseDto):
     return {
         'content' : postContent,
         'meta' : {
-            'id' : str(postReponseDto['id'])
-        }
+            'id' : str(postReponseDto['id']),
+            'postType': PostType.project.value
+        },
+        'id': "{0}_{1}".format(PostType.project.name, postReponseDto['id'])
+    }
+
+def FromUserResponseDtoToElasticSearchModel(userReponseDto):
+    userContent = ""
+    if userReponseDto["skills"] is not None and len(userReponseDto["skills"]) >0:
+        userContent = userContent + "A user who has skills in :"
+        skillsContent = ""
+        for skill in userReponseDto["skills"]:
+            skillsContent = skillsContent + skill["skillName"] + ", "
+        userContent = userContent + skillsContent[:-2] + "."
+       
+    if userReponseDto["experiences"] is not None and len(userReponseDto["experiences"]) >0:
+        for experience in userReponseDto["experiences"]:
+            userContent = userContent + experience["experienceDescription"]
+
+    return {
+        'content' : userContent,
+        'meta' : {
+            'id' : str(userReponseDto['id']),
+            'postType' : PostType.userProfile.value
+        },
+        'id': "{0}_{1}".format(PostType.userProfile.name, userReponseDto['id'])
     }
 
 def FromUserContextDataToSystemContextQuery(userContextData):
@@ -80,8 +109,9 @@ def FromUserContextDataToSystemContextQuery(userContextData):
                     skillsContent = skillsContent + skill["skillName"] + ", "
                 contextQuery = contextQuery + skillsContent[:-2] + "."
                 newSentence = True
-        # if key == "experiences":
-            # dosth
+        if key == "experiences" and len(userContextData["experiences"]) > 0:
+            for experience in userContextData["experiences"]:
+                contextQuery = contextQuery + experience
     return contextQuery
 
 def FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels: list[tuple[Any, ...]]):
@@ -103,6 +133,17 @@ def FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto(userSkillJoinSkill
         })
     
     return skills
+
+def FromExperienceDataModelsToExperiencesResponseDto(experienceDataModels: list[tuple[Any, ...]]):
+    experiences = []
+    for experienceDataModel in experienceDataModels:
+        experiences.append({
+            'id': experienceDataModel[0],
+            'experienceDescription': experienceDataModel[2],
+            'timeline': experienceDataModel[3]
+        })
+    
+    return experiences
 
 def FromPostDataModelsToGetPostsResponseDto(postDataModels: list[tuple[Any, ...]]):
     posts = []

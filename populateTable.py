@@ -85,4 +85,15 @@ curr.execute("""CREATE TABLE IF NOT EXISTS posts_has_skills (
 	  ON DELETE CASCADE  
 )""")
 
+curr.execute("""CREATE TABLE IF NOT EXISTS experiences (
+    id SERIAL PRIMARY KEY,
+    userId INT NOT NULL,
+    experienceDescription VARCHAR(500) NOT NULL,
+    timeline VARCHAR(500) NOT NULL,
+    CONSTRAINT fk_users
+      FOREIGN KEY(userId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE 
+)""")
+
 conn.commit()

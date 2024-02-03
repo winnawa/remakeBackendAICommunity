@@ -4,7 +4,7 @@ from flask import request
 import json
 from app.dataConnection import curr, conn
 from app.queryGenerate import generateInsertPostQuery, generateInsertPostSkillQuery
-# from app.elasticSearchConnection import AutoMatching
+from app.elasticSearchConnection import AutoMatching
 
 @bp.route('/', methods=['POST'])
 def createPost():
@@ -39,8 +39,8 @@ def createPost():
     postReponseDto["skills"] = skillsDetailReponseDto
 
     postElasticSearchModel = FromPostResponseDtoToElasticSearchModel(postReponseDto)
-    # AutoMatching.indexNewData([postElasticSearchModel])
-    # AutoMatching.updateEmbeddingNewData()
+    AutoMatching.indexNewData([postElasticSearchModel])
+    AutoMatching.updateEmbeddingNewData()
 
     return json.dumps({"message": "create post success", "post":postReponseDto}), 200, {'ContentType':'application/json'}
 
