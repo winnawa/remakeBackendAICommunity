@@ -196,7 +196,7 @@ def searchOtherUsersByQuery(userId):
     if postId is not None:
         postId = int(postId)
         document = AutoMatching.getDocumentById(postId, PostType.project)
-        contextQuery = document["content"]
+        contextQuery = document.content
   
     documents = AutoMatching.searchDocuments(queryString, contextQuery, PostType.userProfile.value)
     userIds= []

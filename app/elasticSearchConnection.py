@@ -9,7 +9,7 @@ from app.mapper import PostType
 ELASTIC_PASSWORD = "<password>"
 
 document_store = ElasticsearchDocumentStore(
-    host = "54.81.87.154",
+    host = "54.204.178.34",
     port = 9200,
     username="elasticsearch",
     password= ELASTIC_PASSWORD,

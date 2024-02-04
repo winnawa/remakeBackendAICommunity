@@ -47,7 +47,20 @@ curr.execute("""CREATE TABLE IF NOT EXISTS users_has_skills (
 #     ('Python'),
 #     ('Pandas'),
 #     ('Numpy'),
-#     ('Computer Vision')
+#     ('Computer Vision'),
+#     ('Data Analysis'),
+#     ('Raspberry Pi'),
+#     ('Data Mining'),
+#     ('IoT'),
+#     ('Arduino'),
+#     ('TensorFlow'),
+#     ('Scikit-learn'),
+#     ('NLTK'),
+#     ('Data Science'),
+#     ('Apache Spark'),
+#     ('Hadoop'),
+#     ('Robotics'),
+#     ('Dialogflow')
 # """)
 
 curr.execute("""CREATE TABLE IF NOT EXISTS posts (
