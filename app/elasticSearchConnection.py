@@ -9,7 +9,7 @@ from app.mapper import PostType
 ELASTIC_PASSWORD = "<password>"
 
 document_store = ElasticsearchDocumentStore(
-    host = "54.204.178.34",
+    host = "3.81.225.12",
     port = 9200,
     username="elasticsearch",
     password= ELASTIC_PASSWORD,
@@ -29,11 +29,11 @@ class AutoMatching:
         AutoMatching.document_store.write_documents(documents)
         
     @staticmethod
-    def updateEmbeddingNewData():
+    def updateEmbeddingNewData(filterParam, updateExistingEmbedding):
         AutoMatching.document_store.update_embeddings(
         retriever=AutoMatching.embeddingRetriever, 
-        filters={}, 
-        update_existing_embeddings=False
+        filters=filterParam, 
+        update_existing_embeddings= updateExistingEmbedding
     )
 
     @staticmethod
@@ -49,11 +49,9 @@ class AutoMatching:
         return document
     
     @staticmethod
-    def searchDocuments(inputQuery, contextQuery, documentType):
+    def searchDocuments(inputQuery, contextQuery, filterParam):
         userInput = inputQuery
         fullContextQuery = userInput + contextQuery
-
-        postType = documentType
 
         # keywordRetriever = BM25Retriever(document_store)
         # keywordRetrieverPipeline = Pipeline()
@@ -81,9 +79,7 @@ class AutoMatching:
                 "Retriever": {
                     "top_k": 5
                 },
-                "filters":{
-                    "postType": postType
-                }
+                "filters": filterParam
             }
         )
 

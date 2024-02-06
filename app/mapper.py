@@ -173,3 +173,37 @@ def FromSkillDataModelsToGetSkillsResponseDto(skillDataModels):
         }
         skills.append(skillDto)
     return skills
+
+def FromSearchHistoryDataModelToCreateSearchHistoryResponseDto(searchHistoryDataModel):
+    createSearchHistoryDto = {
+            "id": int(searchHistoryDataModel[0]),
+            "userId": int(searchHistoryDataModel[1]),
+            "searchString": searchHistoryDataModel[2]
+        }
+    return createSearchHistoryDto    
+
+def FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto(searchHistoryDataModels):
+    searchHistories = []
+    for searchHistoryDataModel in searchHistoryDataModels:
+        searchHistory = {
+            "id": int(searchHistoryDataModel[0]),
+            "searchString": searchHistoryDataModel[2]
+        }
+        searchHistories.append(searchHistory)    
+    return searchHistories
+
+def FromFriendshipJoinUserDataModelsToGetFriendsResponseDto(userJoinFriendshipJoinUserDataModels):
+    friends = []
+    for friendshipJoinUserDataModel in userJoinFriendshipJoinUserDataModels:
+        # print(userJoinFriendshipJoinUserDataModel)
+        friendResponseModel = {
+            "id": int(friendshipJoinUserDataModel[4]),
+            "username": str(friendshipJoinUserDataModel[5]),
+            "password": str(friendshipJoinUserDataModel[6]),
+            "email": friendshipJoinUserDataModel[7],
+            "cvLink": friendshipJoinUserDataModel[8],
+            "friendshipDescription": friendshipJoinUserDataModel[3]
+        }
+        friends.append(friendResponseModel)
+    return friends
+

@@ -109,4 +109,30 @@ curr.execute("""CREATE TABLE IF NOT EXISTS experiences (
 	  ON DELETE CASCADE 
 )""")
 
+curr.execute("""CREATE TABLE IF NOT EXISTS user_is_friend_with_user (
+    id SERIAL PRIMARY KEY,
+    firstUserId INT NOT NULL,
+    secondUserId INT NOT NULL,
+    friendshipDescription VARCHAR(500) NOT NULL,                   
+    CONSTRAINT fk_first_user
+      FOREIGN KEY(firstUserId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE,
+    CONSTRAINT fk_second_user
+      FOREIGN KEY(secondUserId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE  
+)""")
+
+curr.execute("""CREATE TABLE IF NOT EXISTS searchHistory (
+    id SERIAL PRIMARY KEY,
+    userId INT NOT NULL,
+    searchString VARCHAR(500) NOT NULL,
+    timeline TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_users
+      FOREIGN KEY(userId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE 
+)""")
+
 conn.commit()

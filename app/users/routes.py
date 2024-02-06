@@ -1,11 +1,11 @@
 from app.elasticSearchConnection import AutoMatching
-from app.queryGenerate import generateFindPostsByIdsQueryString, generateFindUsersByIdsQueryString, generateInsertUserExperienceQuery, generateInsertUserQuery, generateInsertUserSkillQuery
+from app.queryGenerate import generateFindPostsByIdsQueryString, generateInsertFriendshipQuery, generateInsertSearchHistoryQuery, generateInsertUserExperienceQuery, generateInsertUserQuery, generateInsertUserSkillQuery
 from app.repoAbstraction import getDetailsUserResponseDto
 from app.users import bp
 from flask import request
 import json
 from app.dataConnection import curr, conn
-from app.mapper import FromExperienceDataModelsToExperiencesResponseDto, FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromUserContextDataToSystemContextQuery, FromUserDataModelToUserResponseDto, FromUserResponseDtoToElasticSearchModel, FromUserSkillDataModelsToSkillsResponseDto, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
+from app.mapper import FromExperienceDataModelsToExperiencesResponseDto, FromFriendshipJoinUserDataModelsToGetFriendsResponseDto, FromPostDataModelsToGetPostsResponseDto, FromSearchHistoryDataModelToCreateSearchHistoryResponseDto, FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto, FromUserContextDataToSystemContextQuery, FromUserDataModelToUserResponseDto, FromUserResponseDtoToElasticSearchModel, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
 
 @bp.route('/', methods=['POST'])
 def createUser():
@@ -145,7 +145,7 @@ def updateUserExperiences(userId):
 @bp.route('/<userId>/posts', methods=['GET'])
 def searchPostsByQuery(userId):
     queryString = request.args.get('queryString')
-    isConsideringUserContext = int(request.args.get('isConsideringUserContext')) == 1 #0 is false, 1 is true
+    isConsideringUserContext = (int(request.args.get('isConsideringUserContext')) if request.args.get('isConsideringUserContext') is not None else 0) == 1 #0 is false, 1 is true
 
     curr.execute("""SELECT * FROM users WHERE Id = {0}""".format(userId))
     userDataModel = curr.fetchone()
@@ -163,7 +163,11 @@ def searchPostsByQuery(userId):
     contextQuery = ""
     if isConsideringUserContext:
         contextQuery = FromUserContextDataToSystemContextQuery(userContextData)
-    documents = AutoMatching.searchDocuments(queryString, contextQuery, PostType.project.value)
+
+    filterParam = {
+        "postType": PostType.project.value
+    }
+    documents = AutoMatching.searchDocuments(queryString, contextQuery, filterParam)
     postIds= []
     if documents is not None:
         postIds = [int(document.meta['id']) for document in documents['documents']]
@@ -198,7 +202,10 @@ def searchOtherUsersByQuery(userId):
         document = AutoMatching.getDocumentById(postId, PostType.project)
         contextQuery = document.content
   
-    documents = AutoMatching.searchDocuments(queryString, contextQuery, PostType.userProfile.value)
+    filterParam = {
+        "postType": PostType.userProfile.value
+    }
+    documents = AutoMatching.searchDocuments(queryString, contextQuery, filterParam)
     userIds= []
     sortedGetUserResponseDto= []
 
@@ -224,3 +231,175 @@ def searchOtherUsersByQuery(userId):
     #             break
 
     return json.dumps({"message": "get users success", "users":sortedGetUserResponseDto}), 200, {'ContentType':'application/json'}
+
+@bp.route('/<userId>/searchHistory', methods=['GET'])
+def getUserSearchHistory(userId):
+    curr.execute("""SELECT * FROM users WHERE id = {0} """.format(userId))
+    userDataModel = curr.fetchone()
+    if userDataModel is None:
+        return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
+
+    curr.execute("""SELECT * FROM searchHistory WHERE userId = {0} """.format(userId))
+    searchHistoryDataModels = curr.fetchall()
+
+    createSearchHistoryReponseDto = FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto(searchHistoryDataModels)
+
+    return json.dumps({"message": "get searchHistory success", "searchHistory":createSearchHistoryReponseDto}), 200, {'ContentType':'application/json'}
+
+@bp.route('/<userId>/searchHistory', methods=['POST'])
+def addSearchHistory(userId):
+    request_data = request.get_json()
+    createSearchHistoryDto = {}
+    for key in request_data:
+        createSearchHistoryDto[key] = request_data[key]
+    # expect userId, searchString, date
+
+    curr.execute("""SELECT * FROM users WHERE id = {0} """.format(userId))
+    userDataModel = curr.fetchone()
+    if userDataModel is None:
+        return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
+
+    curr.execute("""DELETE FROM searchHistory WHERE userId = {0} and searchString = '{1}'""".format(userId, createSearchHistoryDto["searchString"]))
+
+    insertSearchHistoryQuery = generateInsertSearchHistoryQuery(userId, createSearchHistoryDto)
+    curr.execute(insertSearchHistoryQuery)
+    conn.commit()
+
+    curr.execute("""SELECT * FROM searchHistory WHERE userId = {0} and searchString = '{1}'""".format(userId, createSearchHistoryDto["searchString"]))
+    searchHistoryDataModel = curr.fetchone()
+    createSearchHistoryReponseDto = FromSearchHistoryDataModelToCreateSearchHistoryResponseDto(searchHistoryDataModel)
+
+    return json.dumps({"message": "create user success", "searchHistory":createSearchHistoryReponseDto}), 200, {'ContentType':'application/json'}
+
+@bp.route('/<userId>/friends', methods=['POST'])
+def addFriend(userId):
+    request_data = request.get_json()
+    createFriendshipDto = {}
+    for key in request_data:
+        createFriendshipDto[key] = request_data[key]
+    # expect secondUserId, friendshipDescription
+
+    firstUserId = userId
+    secondUserId = createFriendshipDto["friendId"]
+
+    curr.execute("""SELECT * FROM users WHERE id = {0} """.format(firstUserId))
+    userDataModel = curr.fetchone()
+    if userDataModel is None:
+        return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
+
+    curr.execute("""SELECT * FROM users WHERE id = {0} """.format(secondUserId))
+    userDataModel = curr.fetchone()
+    if userDataModel is None:
+        return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
+    
+    curr.execute("""SELECT * FROM user_is_friend_with_user WHERE (firstUserId = {0} and secondUserId = {1}) or (firstUserId = {1} and secondUserId = {0})""".format(firstUserId, secondUserId))
+    userDataModel = curr.fetchone()
+    if userDataModel is not None:
+        return json.dumps({"message": "friendship existed"}), 400, {'ContentType':'application/json'}
+    
+    insertFriendshipQuery = generateInsertFriendshipQuery(userId,createFriendshipDto)
+    curr.execute(insertFriendshipQuery)
+
+    createSecondUserFriendshipDto = {}
+    for key in createFriendshipDto:
+        if key != "friendId" and key != "friendshipDescription":
+            createSecondUserFriendshipDto[key] = createFriendshipDto[key]
+    createSecondUserFriendshipDto["friendId"] = firstUserId
+    createSecondUserFriendshipDto["friendshipDescription"] = ""
+    insertFriendshipQuery = generateInsertFriendshipQuery(secondUserId,createSecondUserFriendshipDto)
+    curr.execute(insertFriendshipQuery)
+    conn.commit()
+
+    firstUserDocument = AutoMatching.getDocumentById(userId,PostType.userProfile)
+    firstUserFriendIds = []
+    if "friendIds" in firstUserDocument.meta:
+        firstUserFriendIds = firstUserDocument.meta["friendIds"]
+    firstUserFriendIds.append(secondUserId)
+    firstUserDocument.meta["friendIds"] = firstUserFriendIds
+    AutoMatching.indexNewData([firstUserDocument])
+    filterParam = {
+        "_id": "{0}_{1}".format(PostType.userProfile.name, firstUserId)
+    }
+    AutoMatching.updateEmbeddingNewData(filterParam, True)
+
+    secondUserDocument = AutoMatching.getDocumentById(secondUserId, PostType.userProfile)
+    secondUserFriendIds = []
+    if "friendIds" in secondUserDocument.meta:
+        secondUserFriendIds = secondUserDocument.meta["friendIds"]
+    secondUserFriendIds.append(firstUserId)
+    secondUserDocument.meta["friendIds"] = secondUserFriendIds
+    AutoMatching.indexNewData([secondUserDocument])
+    filterParam = {
+        "_id": "{0}_{1}".format(PostType.userProfile.name, secondUserId)
+    }
+    AutoMatching.updateEmbeddingNewData(filterParam, True)
+
+    # will find the document and add userId to the list. Later on, we can filter and query for search history
+    # "filters":{
+    #             "postType": postType,
+    #             "friendIds": 10
+    #         }
+
+    # possibly creating a document type friendshipPost
+
+    return json.dumps({"message": "add friendship success"}), 200, {'ContentType':'application/json'}
+
+
+@bp.route('/<userId>/friends', methods=['GET'])
+def getUserFriends(userId):
+    getFriendsResponseDto = []
+    isRecommendingNewFriendship = (int(request.args.get('isRecommendingNewFriendship')) if request.args.get('isRecommendingNewFriendship') is not None else 0) == 1 #0 is false, 1 is true
+    
+    if isRecommendingNewFriendship:
+        userDocument = AutoMatching.getDocumentById(userId, PostType.userProfile)
+        # get user friendList
+        friendIds = userDocument.meta["friendIds"]
+        # get user search history
+        curr.execute("""SELECT * FROM searchHistory WHERE userId = {0} LIMIT 5""".format(userId))
+        searchHistoryDataModels = curr.fetchall()
+
+        # use elasticsearch to find the document containing number in the list
+        userSearchHistories = FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto(searchHistoryDataModels)
+        print(userSearchHistories)
+        excludeIds = [id for id in friendIds]
+        excludeIds.append(userId)
+
+        userIds= []
+        queryStringSuggestions = []
+        for userSearchHistory in userSearchHistories:
+            # filter option here
+            filterParam = {
+                "postType": PostType.userProfile.value,
+                "friendIds": friendIds,
+                "id": {"$nin": excludeIds}
+            }
+            documents = AutoMatching.searchDocuments(userSearchHistory["searchString"], "", filterParam)
+            for document in documents["documents"]:
+                if document.meta["id"] not in userIds:
+                    userIds.append(document.meta["id"])
+                    queryStringSuggestions.append(userSearchHistory["searchString"])
+                if  len(userIds) > 3:
+                    break
+            if  len(userIds) > 3:
+                    break    
+        
+        for userId, queryStringSuggestion in zip(userIds,queryStringSuggestions):
+            userResponseModel = getDetailsUserResponseDto(None, userId, None, None)
+            userResponseModel["suggestionQueryString"] = queryStringSuggestion
+            getFriendsResponseDto.append(userResponseModel)
+        
+        return json.dumps({"message": "get friends suggestion success", "friends":getFriendsResponseDto}), 200, {'ContentType':'application/json'}
+
+    else:
+        curr.execute("""SELECT * 
+            FROM user_is_friend_with_user as UIFWU  
+            JOIN users as U on UIFWU.secondUserId = U.id  
+            WHERE (UIFWU.firstUserId = {0}) LIMIT 100""".format(userId))
+        friendshipJoinUserDataModels = curr.fetchall()
+
+        friendModels = FromFriendshipJoinUserDataModelsToGetFriendsResponseDto(friendshipJoinUserDataModels)
+        getFriendsResponseDto = []
+        for friendModel in friendModels:
+            detailedFriendModel = getDetailsUserResponseDto(friendModel, None, None, None)
+            getFriendsResponseDto.append(detailedFriendModel)
+    return json.dumps({"message": "get friends success", "friends":getFriendsResponseDto}), 200, {'ContentType':'application/json'}
