@@ -1,4 +1,4 @@
-from app.mapper import FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostResponseDtoToElasticSearchModel, FromPostSkillDataModelsToSkillsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto
+from app.mapper import FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostResponseDtoToElasticSearchModel, FromPostSkillDataModelsToSkillsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
 from app.posts import bp
 from flask import request
 import json
@@ -40,7 +40,11 @@ def createPost():
 
     postElasticSearchModel = FromPostResponseDtoToElasticSearchModel(postReponseDto)
     AutoMatching.indexNewData([postElasticSearchModel])
-    AutoMatching.updateEmbeddingNewData()
+
+    filterParam = {
+        "_id": "{0}_{1}".format(PostType.project.name, postReponseDto["id"])
+    }
+    AutoMatching.updateEmbeddingNewData(filterParam, True)
 
     return json.dumps({"message": "create post success", "post":postReponseDto}), 200, {'ContentType':'application/json'}
 

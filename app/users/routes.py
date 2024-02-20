@@ -108,7 +108,10 @@ def updateUserSkills(userId):
     userReponseDto = getDetailsUserResponseDto(None, userId, userSkillsDetailReponseDto, None)
     userElasticSearchModel = FromUserResponseDtoToElasticSearchModel(userReponseDto)
     AutoMatching.indexNewData([userElasticSearchModel])
-    AutoMatching.updateEmbeddingNewData()
+    filterParam = {
+        "_id": "{0}_{1}".format(PostType.userProfile.name, userId)
+    }
+    AutoMatching.updateEmbeddingNewData(filterParam, True)
 
     return json.dumps({"message": "update skills success", "skills":userSkillsDetailReponseDto}), 200, {'ContentType':'application/json'}
 
@@ -138,7 +141,10 @@ def updateUserExperiences(userId):
     userReponseDto = getDetailsUserResponseDto(None, userId, None, experiencesReponseDto)
     userElasticSearchModel = FromUserResponseDtoToElasticSearchModel(userReponseDto)
     AutoMatching.indexNewData([userElasticSearchModel])
-    AutoMatching.updateEmbeddingNewData()
+    filterParam = {
+        "_id": "{0}_{1}".format(PostType.userProfile.name, userId)
+    }
+    AutoMatching.updateEmbeddingNewData(filterParam, True)
 
     return json.dumps({"message": "update experiences success", "experiences":experiencesReponseDto}), 200, {'ContentType':'application/json'}
 
@@ -374,15 +380,16 @@ def getUserFriends(userId):
                 "id": {"$nin": excludeIds}
             }
             documents = AutoMatching.searchDocuments(userSearchHistory["searchString"], "", filterParam)
-            for document in documents["documents"]:
-                if document.meta["id"] not in userIds:
-                    userIds.append(document.meta["id"])
-                    queryStringSuggestions.append(userSearchHistory["searchString"])
+            if documents is not None:
+                for document in documents["documents"]:
+                    if document.meta["id"] not in userIds:
+                        userIds.append(document.meta["id"])
+                        queryStringSuggestions.append(userSearchHistory["searchString"])
+                    if  len(userIds) > 3:
+                        break
                 if  len(userIds) > 3:
-                    break
-            if  len(userIds) > 3:
-                    break    
-        
+                        break    
+            
         for userId, queryStringSuggestion in zip(userIds,queryStringSuggestions):
             userResponseModel = getDetailsUserResponseDto(None, userId, None, None)
             userResponseModel["suggestionQueryString"] = queryStringSuggestion
