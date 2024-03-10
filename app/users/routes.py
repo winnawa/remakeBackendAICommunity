@@ -236,17 +236,28 @@ def searchOtherUsersByQuery(userId):
         contextQuery = document.content
   
     filterParam = {
-        "postType": PostType.userProfile.value
+        "postType": PostType.userProfile.value,
+        "id": {"$ne": "{}".format(userId)}
     }
     documents = AutoMatching.searchDocuments(queryString, contextQuery, filterParam)
     userIds= []
     sortedGetUserResponseDto= []
 
+    # get the searcher document to get friendIds, thus we know whether user and searcher is friend or not
+    seacherDocument = AutoMatching.getDocumentById(userId, PostType.userProfile)
+    friendIds = seacherDocument.meta["friendIds"] if "friendIds" in seacherDocument.meta else []
+
     if documents is not None:
         userIds = [int(document.meta['id']) for document in documents['documents']]
         for userId in userIds:
             userResponseDto = getDetailsUserResponseDto(None, userId, None, None)
+
+            # check if stranger or friend
+            userResponseDto["isFriend"] = userResponseDto["id"] in friendIds 
+            
             sortedGetUserResponseDto.append(userResponseDto)
+        
+        ############################################################################### 
         # findUsersByIdsQueryString = generateFindUsersByIdsQueryString(userIds)
 
         # curr.execute(findUsersByIdsQueryString)
