@@ -26,6 +26,8 @@ def createUser():
     curr.execute("""SELECT * FROM users WHERE username = '{0}' """.format(createUserDto["username"]))
     userDataModel = curr.fetchone()
     userReponseDto = FromUserDataModelToUserResponseDto(userDataModel)
+      
+    userReponseDto = getDetailsUserResponseDto(userReponseDto, None, None, None)
 
     # index data to elastic search
     userElasticSearchModel = FromUserResponseDtoToElasticSearchModel(userReponseDto)
@@ -283,7 +285,7 @@ def getUserSearchHistory(userId):
     if userDataModel is None:
         return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
 
-    curr.execute("""SELECT * FROM searchHistory WHERE userId = {0} """.format(userId))
+    curr.execute("""SELECT * FROM searchHistory WHERE userId = {0} ORDER BY Id DESC LIMIT 3""".format(userId))
     searchHistoryDataModels = curr.fetchall()
 
     createSearchHistoryReponseDto = FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto(searchHistoryDataModels)
