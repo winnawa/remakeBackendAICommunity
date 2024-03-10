@@ -27,6 +27,14 @@ def createUser():
     userDataModel = curr.fetchone()
     userReponseDto = FromUserDataModelToUserResponseDto(userDataModel)
 
+    # index data to elastic search
+    userElasticSearchModel = FromUserResponseDtoToElasticSearchModel(userReponseDto)
+    AutoMatching.indexNewData([userElasticSearchModel])
+    filterParam = {
+        "_id": "{0}_{1}".format(PostType.userProfile.name, userReponseDto['id'])
+    }
+    AutoMatching.updateEmbeddingNewData(filterParam, True)
+
     return json.dumps({"message": "create user success", "user":userReponseDto}), 200, {'ContentType':'application/json'}
 
 @bp.route('/', methods=['PUT'])
@@ -47,7 +55,7 @@ def login():
 
     userReponseDto = FromUserDataModelToUserResponseDto(userDataModel)
 
-    # add skills and experiences
+    # get details (exps and skills)
     userReponseDto = getDetailsUserResponseDto(userReponseDto, None, None, None)
 
     return json.dumps({"message": "login success", "user":userReponseDto}), 200, {'ContentType':'application/json'}
@@ -77,6 +85,19 @@ def updateUserById(userId):
     userDataModel = curr.fetchone()
     userReponseDto = FromUserDataModelToUserResponseDto(userDataModel)
 
+    # get data to index to ElasticSearch
+    userDocument = AutoMatching.getDocumentById(userId,PostType.userProfile)
+
+    userReponseDto = getDetailsUserResponseDto(userReponseDto, userId, None, None)
+    userElasticSearchModel = FromUserResponseDtoToElasticSearchModel(userReponseDto)
+
+    userDocument.meta["content"] = userElasticSearchModel["content"]
+    AutoMatching.indexNewData([userDocument])
+    filterParam = {
+        "_id": "{0}_{1}".format(PostType.userProfile.name, userId)
+    }
+    AutoMatching.updateEmbeddingNewData(filterParam, True)
+
     return json.dumps({"message": "update user success", "user":userReponseDto}), 200, {'ContentType':'application/json'}
 
 
@@ -105,9 +126,12 @@ def updateUserSkills(userId):
     userSkillsDetailReponseDto = FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto(userSkillJoinSkillDataModels)
     
     # get data to index to ElasticSearch
+    userDocument = AutoMatching.getDocumentById(userId,PostType.userProfile)
+
     userReponseDto = getDetailsUserResponseDto(None, userId, userSkillsDetailReponseDto, None)
     userElasticSearchModel = FromUserResponseDtoToElasticSearchModel(userReponseDto)
-    AutoMatching.indexNewData([userElasticSearchModel])
+    userDocument.meta["content"] = userElasticSearchModel["content"]
+    AutoMatching.indexNewData([userDocument])
     filterParam = {
         "_id": "{0}_{1}".format(PostType.userProfile.name, userId)
     }
@@ -138,9 +162,12 @@ def updateUserExperiences(userId):
     experiencesReponseDto = FromExperienceDataModelsToExperiencesResponseDto(experienceDataModels)
 
     # get data to index to ElasticSearch
+    userDocument = AutoMatching.getDocumentById(userId,PostType.userProfile)
+
     userReponseDto = getDetailsUserResponseDto(None, userId, None, experiencesReponseDto)
     userElasticSearchModel = FromUserResponseDtoToElasticSearchModel(userReponseDto)
-    AutoMatching.indexNewData([userElasticSearchModel])
+    userDocument.meta["content"] = userElasticSearchModel["content"]
+    AutoMatching.indexNewData([userDocument])
     filterParam = {
         "_id": "{0}_{1}".format(PostType.userProfile.name, userId)
     }
@@ -359,7 +386,7 @@ def getUserFriends(userId):
     if isRecommendingNewFriendship:
         userDocument = AutoMatching.getDocumentById(userId, PostType.userProfile)
         # get user friendList
-        friendIds = userDocument.meta["friendIds"]
+        friendIds = userDocument.meta["friendIds"] if "friendIds" in userDocument.meta else []
         # get user search history
         curr.execute("""SELECT * FROM searchHistory WHERE userId = {0} LIMIT 5""".format(userId))
         searchHistoryDataModels = curr.fetchall()

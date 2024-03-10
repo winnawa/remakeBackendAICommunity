@@ -49,33 +49,33 @@ def createPost():
     return json.dumps({"message": "create post success", "post":postReponseDto}), 200, {'ContentType':'application/json'}
 
 
-@bp.route('/<postId>/skills', methods=['PUT'])
-def updatePostSkills(postId):
+# @bp.route('/<postId>/skills', methods=['PUT'])
+# def updatePostSkills(postId):
     
-    curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
-    postDataModel = curr.fetchone()
-    if postDataModel is None:
-        return json.dumps({"message": "post not found"}), 404, {'ContentType':'application/json'}
+#     curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
+#     postDataModel = curr.fetchone()
+#     if postDataModel is None:
+#         return json.dumps({"message": "post not found"}), 404, {'ContentType':'application/json'}
 
-    request_data = request.get_json()
-    # updateUserSkillsDto = {
-    #     "skills": request_data['skills'],
-    # }
-    skillIds = request_data['skills']
+#     request_data = request.get_json()
+#     # updateUserSkillsDto = {
+#     #     "skills": request_data['skills'],
+#     # }
+#     skillIds = request_data['skills']
 
-    curr.execute("""DELETE FROM posts_has_skills WHERE postId = {0}""".format(postId))
+#     curr.execute("""DELETE FROM posts_has_skills WHERE postId = {0}""".format(postId))
     
-    insertPostSkillQuery = generateInsertPostSkillQuery(postId, skillIds)
-    curr.execute(insertPostSkillQuery)
-    conn.commit()
+#     insertPostSkillQuery = generateInsertPostSkillQuery(postId, skillIds)
+#     curr.execute(insertPostSkillQuery)
+#     conn.commit()
     
-    curr.execute("""SELECT * FROM posts_has_skills WHERE postId = {0}""".format(postId))
+#     curr.execute("""SELECT * FROM posts_has_skills WHERE postId = {0}""".format(postId))
     
-    postSkillDataModels = curr.fetchall()
-    skillsReponseDto = FromPostSkillDataModelsToSkillsResponseDto(postSkillDataModels)
+#     postSkillDataModels = curr.fetchall()
+#     skillsReponseDto = FromPostSkillDataModelsToSkillsResponseDto(postSkillDataModels)
 
-    # need to implement the indexing after update skills   
-    return json.dumps({"message": "update skills success", "skills":skillsReponseDto}), 200, {'ContentType':'application/json'}
+#     # need to implement the indexing after update skills   
+#     return json.dumps({"message": "update skills success", "skills":skillsReponseDto}), 200, {'ContentType':'application/json'}
 
 
 @bp.route('/', methods=['GET'])

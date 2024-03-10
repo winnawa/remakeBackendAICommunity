@@ -77,13 +77,16 @@ def FromPostResponseDtoToElasticSearchModel(postReponseDto):
 
 def FromUserResponseDtoToElasticSearchModel(userReponseDto):
     userContent = ""
+    if userReponseDto["username"] is not None:
+        userContent = userContent + "Username is {0}.".format(userReponseDto["username"])
+
     if userReponseDto["skills"] is not None and len(userReponseDto["skills"]) >0:
         userContent = userContent + "A user who has skills in :"
         skillsContent = ""
         for skill in userReponseDto["skills"]:
             skillsContent = skillsContent + skill["skillName"] + ", "
         userContent = userContent + skillsContent[:-2] + "."
-       
+
     if userReponseDto["experiences"] is not None and len(userReponseDto["experiences"]) >0:
         for experience in userReponseDto["experiences"]:
             userContent = userContent + experience["experienceDescription"]
@@ -92,7 +95,8 @@ def FromUserResponseDtoToElasticSearchModel(userReponseDto):
         'content' : userContent,
         'meta' : {
             'id' : str(userReponseDto['id']),
-            'postType' : PostType.userProfile.value
+            'postType' : PostType.userProfile.value,
+            'friendIds': []
         },
         'id': "{0}_{1}".format(PostType.userProfile.name, userReponseDto['id'])
     }
