@@ -4,7 +4,7 @@ from app.repoAbstraction import getDetailsUserResponseDto
 from app.users import bp
 from flask import request
 import json
-from app.dataConnection import curr, conn
+from dataConnection import curr, conn
 from app.mapper import FromExperienceDataModelsToExperiencesResponseDto, FromFriendshipJoinUserDataModelsToGetFriendsResponseDto, FromPostDataModelsToGetPostsResponseDto, FromSearchHistoryDataModelToCreateSearchHistoryResponseDto, FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto, FromUserContextDataToSystemContextQuery, FromUserDataModelToUserResponseDto, FromUserResponseDtoToElasticSearchModel, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
 
 @bp.route('/', methods=['POST'])

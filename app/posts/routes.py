@@ -2,7 +2,7 @@ from app.mapper import FromPostDataModelToPostResponseDto, FromPostDataModelsToG
 from app.posts import bp
 from flask import request
 import json
-from app.dataConnection import curr, conn
+from dataConnection import curr, conn
 from app.queryGenerate import generateInsertPostQuery, generateInsertPostSkillQuery
 from app.elasticSearchConnection import AutoMatching
 
@@ -33,7 +33,7 @@ def createPost():
         conn.commit()
     curr.execute("""SELECT * FROM posts_has_skills as PHS JOIN skills as S ON PHS.skillId = S.id 
                  WHERE PHS.postId = {0}""".format(postReponseDto["id"]))
-    
+
     postSkillJoinSkillDataModels = curr.fetchall()
     skillsDetailReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels)
     postReponseDto["skills"] = skillsDetailReponseDto
@@ -80,10 +80,16 @@ def createPost():
 
 @bp.route('/', methods=['GET'])
 def getPosts():
+    creatorId = int(request.args.get('creatorId')) if request.args.get('creatorId') is not None else None
+
     page = int(request.args.get('page')) if request.args.get('page') is not None else 0
     size = int(request.args.get('size')) if request.args.get('size') is not None else 10
 
-    curr.execute("""SELECT * FROM posts LIMIT 100""")
+    queryString = """SELECT * FROM posts LIMIT 100""" 
+    if creatorId is not None:
+        queryString = """SELECT * FROM posts WHERE creatorId = {}""".format(creatorId) 
+
+    curr.execute(queryString)
     postsDataModels = curr.fetchall()
 
     startPoint = page*size

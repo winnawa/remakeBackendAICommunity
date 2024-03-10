@@ -1,4 +1,4 @@
-from app.dataConnection import curr, conn
+from dataConnection import curr, conn
 from app.mapper import FromExperienceDataModelsToExperiencesResponseDto, FromUserDataModelToUserResponseDto, FromUserSkillDataModelsToSkillsResponseDto, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto
 
 def getDetailsUserResponseDto(userReponseDto,userId,userSkillsDetailReponseDto,experiencesResponseDto):
