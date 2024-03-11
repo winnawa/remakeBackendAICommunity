@@ -6,6 +6,10 @@ class PostType(Enum):
     project = '0'
     userProfile = '1'
 
+class NotificationType(Enum):
+    projectCreation = '0'
+    friendRequest = '1'    
+
 def FromUserDataModelToUserResponseDto(userDataModel: tuple[Any, ...]):
     
     userDto = {

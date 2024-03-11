@@ -9,7 +9,7 @@ from app.mapper import PostType
 ELASTIC_PASSWORD = "<password>"
 
 document_store = ElasticsearchDocumentStore(
-    host = "34.203.232.222",
+    host = "52.91.142.16",
     port = 9200,
     username="elasticsearch",
     password= ELASTIC_PASSWORD,
@@ -87,6 +87,7 @@ class AutoMatching:
         
         # retrieverOutput = []
         retrieverOutput = embeddingRetrieverPipelineOutput['documents'] if embeddingRetrieverPipelineOutput['documents'] is not None else []
+        retrieverOutput = [document for document in retrieverOutput if document.score > 0.6]
         # countList = []
         # for document in retrieverOutputWithDuplicate:
         #     if  document.meta['id'] not in countList:
@@ -108,3 +109,28 @@ class AutoMatching:
 
         print(result)
         return result
+    
+    def searchRelatedDocuments(inputQuery, filterParam):
+        userInput = inputQuery
+
+        embeddingRetriever = EmbeddingRetriever(
+            document_store=document_store,
+            embedding_model="sentence-transformers/all-mpnet-base-v2",
+            model_format="sentence_transformers",
+            scale_score= False
+        )
+        embeddingRetrieverPipeline = Pipeline()
+        embeddingRetrieverPipeline.add_node(component=embeddingRetriever, name="Retriever", inputs=["Query"])
+        result = embeddingRetrieverPipeline.run(
+            query=userInput,
+            params={
+                "Retriever": {
+                    "top_k": 10
+                },
+                "filters": filterParam
+            }
+        )
+
+        print(result)
+        return result
+
