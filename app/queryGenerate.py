@@ -121,3 +121,25 @@ def generateInsertFriendshipQuery(userId, createFriendshipDto):
     query = prefixQuery[:-2] + postfixQuery[:-2] + ")"
 
     return query
+
+def generateUpdatePostQuery(postId, updatePostDetailsDto):
+    prefixQuery = "UPDATE posts SET title = '{0}', creatorId = {1}".format(updatePostDetailsDto["title"],updatePostDetailsDto["creatorId"]) 
+    if updatePostDetailsDto["privacy"] is not None:
+        prefixQuery += ",privacy = '{}'".format(updatePostDetailsDto["privacy"])
+    else:
+        prefixQuery += ",privacy = NULL"
+    if updatePostDetailsDto["status"] is not None:
+        prefixQuery += ",status = '{}'".format(updatePostDetailsDto["status"])
+    else:
+        prefixQuery += ",status = NULL"
+    if updatePostDetailsDto["projectLink"] is not None:
+        prefixQuery += ", projectLink = '{}'".format(updatePostDetailsDto["projectLink"])
+    else:
+        prefixQuery += ",projectLink = NULL"
+    if updatePostDetailsDto["contactEmail"] is not None:
+        prefixQuery += ", contactEmail = '{}'".format(updatePostDetailsDto["contactEmail"])
+    else:
+        prefixQuery += ", contactEmail = NULL"
+    
+    prefixQuery += """,objectivesProjectInformation = '{0}', methodologyProjectInformation = '{1}',datasetProjectInformation = '{2}',timelineProjectInformation = '{3}' WHERE Id = {4}""".format(updatePostDetailsDto["objectivesProjectInformation"],updatePostDetailsDto["methodologyProjectInformation"],updatePostDetailsDto["datasetProjectInformation"],updatePostDetailsDto["timelineProjectInformation"], postId) 
+    return prefixQuery

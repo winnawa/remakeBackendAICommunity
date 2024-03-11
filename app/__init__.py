@@ -14,5 +14,6 @@ def create_app():
     app.register_blueprint(posts_bp, url_prefix='/posts')
     from app.skills import bp as skills_bp
     app.register_blueprint(skills_bp,url_prefix='/skills')
-
+    from app.notifications import bp as notifications_bp
+    app.register_blueprint(notifications_bp,url_prefix='/notifications')
     return app
