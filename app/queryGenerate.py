@@ -143,3 +143,26 @@ def generateUpdatePostQuery(postId, updatePostDetailsDto):
     
     prefixQuery += """,objectivesProjectInformation = '{0}', methodologyProjectInformation = '{1}',datasetProjectInformation = '{2}',timelineProjectInformation = '{3}' WHERE Id = {4}""".format(updatePostDetailsDto["objectivesProjectInformation"],updatePostDetailsDto["methodologyProjectInformation"],updatePostDetailsDto["datasetProjectInformation"],updatePostDetailsDto["timelineProjectInformation"], postId) 
     return prefixQuery
+
+def generateInsertNotificationQuery(createNotificationDto):
+    prefixQuery = "INSERT INTO notifications ("
+    postfixQuery = ") VALUES ("
+    for key in createNotificationDto:
+        if key == "postId":
+            prefixQuery = prefixQuery + key + ", "
+            postfixQuery = postfixQuery + "{}".format(createNotificationDto[key]) + ", "
+        else:    
+            prefixQuery = prefixQuery + key + ", "
+            postfixQuery = postfixQuery + "'{}'".format(createNotificationDto[key]) + ", "
+    
+    query = prefixQuery[:-2] + postfixQuery[:-2] + ")"
+
+    return query
+
+def generateInsertUserIsNotifiedByNotificationQuery(notificationReponseDto,userIds):
+    prefixQuery = "INSERT INTO user_is_notified_by_notification (userId, notificationId) VALUES "
+    for userId in userIds:
+        postfixQuery = "({0},{1}),".format(notificationReponseDto["id"],userId)
+        prefixQuery += postfixQuery
+    query = prefixQuery[0:-1]
+    return query

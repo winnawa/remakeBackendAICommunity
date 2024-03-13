@@ -257,4 +257,31 @@ curr.execute("""CREATE TABLE IF NOT EXISTS user_is_friend_with_user (
 #     (4,5,"")                         
 # """)
 
+curr.execute("""CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY,
+    createdTime VARCHAR(255),         
+    notificationDescription VARCHAR(500), 
+    type INT NOT NULL,
+    postId INT,
+    CONSTRAINT fk_post
+      FOREIGN KEY(postId) 
+	  REFERENCES posts(id)
+	  ON DELETE CASCADE
+)""")
+
+
+curr.execute("""CREATE TABLE IF NOT EXISTS user_is_notified_by_notification (
+    id INTEGER PRIMARY KEY,
+    userId INT NOT NULL,
+    notificationId INT NOT NULL,
+    CONSTRAINT fk_user
+      FOREIGN KEY(userId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE,
+    CONSTRAINT fk_notification
+      FOREIGN KEY(notificationId) 
+	  REFERENCES notifications(id)
+	  ON DELETE CASCADE  
+)""")
+
 conn.commit()

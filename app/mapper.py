@@ -74,7 +74,8 @@ def FromPostResponseDtoToElasticSearchModel(postReponseDto):
         'content' : postContent,
         'meta' : {
             'id' : str(postReponseDto['id']),
-            'postType': PostType.project.value
+            'postType': PostType.project.value,
+            'creatorId': str(postReponseDto["creatorId"])
         },
         'id': "{0}_{1}".format(PostType.project.name, postReponseDto['id'])
     }
@@ -215,3 +216,12 @@ def FromFriendshipJoinUserDataModelsToGetFriendsResponseDto(userJoinFriendshipJo
         friends.append(friendResponseModel)
     return friends
 
+def FromNotificationDataModelToNotificationReponseDto(notificationDataModel):
+    notificationResponseDto = {
+            "id": int(notificationDataModel[0]),
+            "createdTime": notificationDataModel[1],
+            "notificationDescription": notificationDataModel[2],
+            "type": int(notificationDataModel[3]),
+            "postId": int(notificationDataModel[4])
+        }
+    return notificationResponseDto   
