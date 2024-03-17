@@ -1,4 +1,4 @@
-from app.mapper import FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostResponseDtoToElasticSearchModel, FromPostSkillDataModelsToSkillsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
+from app.mapper import FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostHasStarDataModelsToStarsResponseDto, FromPostResponseDtoToElasticSearchModel, FromPostSkillDataModelsToSkillsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
 from app.posts import bp
 from flask import request
 import json
@@ -32,17 +32,20 @@ def createPost():
     postDataModel = curr.fetchone()
     postReponseDto = FromPostDataModelToPostResponseDto(postDataModel)
 
+    # insert skills
     if len(postSkills) > 0:
         insertUserSkillQuery = generateInsertPostSkillQuery(postReponseDto["id"], postSkills)
         curr.execute(insertUserSkillQuery)
         conn.commit()
+    
+    # add-on skills
     curr.execute("""SELECT * FROM posts_has_skills as PHS JOIN skills as S ON PHS.skillId = S.id 
-                 WHERE PHS.postId = {0}""".format(postReponseDto["id"]))
-
+                 WHERE PHS.postId = {0}""".format(postReponseDto["id"])) 
     postSkillJoinSkillDataModels = curr.fetchall()
     skillsDetailReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels)
     postReponseDto["skills"] = skillsDetailReponseDto
 
+    # index to elasticsearch
     postElasticSearchModel = FromPostResponseDtoToElasticSearchModel(postReponseDto)
     AutoMatching.indexNewData([postElasticSearchModel])
 
@@ -63,9 +66,6 @@ def updatePostSkills(postId):
         return json.dumps({"message": "post not found"}), 404, {'ContentType':'application/json'}
 
     request_data = request.get_json()
-    # updateUserSkillsDto = {
-    #     "skills": request_data['skills'],
-    # }
     skillIds = request_data['skills']
 
     curr.execute("""DELETE FROM posts_has_skills WHERE postId = {0}""".format(postId))
@@ -79,7 +79,8 @@ def updatePostSkills(postId):
     postSkillDataModels = curr.fetchall()
     skillsReponseDto = FromPostSkillDataModelsToSkillsResponseDto(postSkillDataModels)
 
-    # need to implement the indexing after update skills   
+    # re-indexing after update skills   
+    # add-on skills
     postReponseDto = FromPostDataModelToPostResponseDto(postDataModel)
     curr.execute("""SELECT * FROM posts_has_skills as PHS JOIN skills as S ON PHS.skillId = S.id 
                  WHERE PHS.postId = {0}""".format(postReponseDto["id"]))
@@ -88,6 +89,7 @@ def updatePostSkills(postId):
     skillsDetailReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels)
     postReponseDto["skills"] = skillsDetailReponseDto
 
+    # index to elasticsearch
     postElasticSearchModel = FromPostResponseDtoToElasticSearchModel(postReponseDto)
 
     postDocument = AutoMatching.getDocumentById(postId,PostType.project)
@@ -130,15 +132,17 @@ def updatePostDetails(postId):
     }
 
     updatePostQuery = generateUpdatePostQuery(postId, updatePostDetailsDto)
-    print(updatePostQuery)
+    # print(updatePostQuery)
     curr.execute(updatePostQuery)
     conn.commit()
 
-    # need to implement the indexing after update skills   
+    # re-indexing after update skills  
+    # get post 
     curr.execute("""SELECT * FROM posts WHERE id = {0}""".format(postId))
     postDataModel = curr.fetchone()
     postReponseDto = FromPostDataModelToPostResponseDto(postDataModel)
     
+    # add-on skills 
     curr.execute("""SELECT * FROM posts_has_skills as PHS JOIN skills as S ON PHS.skillId = S.id 
                  WHERE PHS.postId = {0}""".format(postReponseDto["id"]))
 
@@ -146,6 +150,7 @@ def updatePostDetails(postId):
     skillsDetailReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels)
     postReponseDto["skills"] = skillsDetailReponseDto
 
+    # index to elasticsearch
     postElasticSearchModel = FromPostResponseDtoToElasticSearchModel(postReponseDto)
 
     postDocument = AutoMatching.getDocumentById(postId,PostType.project)
@@ -183,7 +188,7 @@ def getPosts():
 
 @bp.route('/<postId>', methods=['GET'])
 def getPostDetails(postId):
-    
+
     curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
     postDataModel = curr.fetchone()
     if postDataModel is None:
@@ -191,11 +196,60 @@ def getPostDetails(postId):
     
     postReponseDto = FromPostDataModelToPostResponseDto(postDataModel)
 
-    
+    # add-on skills
     curr.execute("""SELECT * FROM posts_has_skills AS PHS JOIN skills AS S ON PHS.skillId = S.Id WHERE PHS.postId = {0}""".format(postId))
     postHasSkillJoinsSkillDataModels = curr.fetchall()
     skillsReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postHasSkillJoinsSkillDataModels)
 
     postReponseDto['skills'] = skillsReponseDto
   
+    # add-on stars
+    curr.execute("""SELECT * FROM post_has_starts WHERE postId = {0}""".format(postId))
+    postHasStarDataModels = curr.fetchall()
+    starsReponseDto = FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels)
+
+    postReponseDto['stars'] = starsReponseDto
+  
     return json.dumps({"message": "get post details success", "post":postReponseDto}), 200, {'ContentType':'application/json'}
+
+
+@bp.route('/<postId>/stars', methods=['POST'])
+def createStarForPost(postId):
+    request_data = request.get_json()
+    userId = request_data['userId']
+
+    curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
+    postDataModel = curr.fetchone()
+    if postDataModel is None:
+        return json.dumps({"message": "post not found"}), 404, {'ContentType':'application/json'}
+    
+    # add-on stars
+    curr.execute("""SELECT * FROM post_has_starts WHERE postId = {0} and userId = {1}""".format(postId,userId))
+    postHasStarDataModel = curr.fetchone()
+    if postHasStarDataModel is not None:
+        return json.dumps({"message": "user already add star to post "}), 400, {'ContentType':'application/json'}
+    
+    curr.execute("""INSERT INTO post_has_starts (postId,userId) VALUES ({0},{1}) """.format(postId,userId))
+    conn.commit()
+
+    curr.execute("""SELECT * FROM post_has_starts WHERE postId = {0}""".format(postId))
+    postHasStarDataModels = curr.fetchall()
+    print(postHasStarDataModels)
+    starsReponseDto = FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels)
+
+    return json.dumps({"message": "add stars to post success", "stars":starsReponseDto}), 200, {'ContentType':'application/json'}
+
+@bp.route('/<postId>/stars', methods=['DELETE'])
+def deleteStarForPost(postId):
+    request_data = request.get_json()
+    userId = request_data['userId']
+
+    curr.execute("""DELETE FROM post_has_starts WHERE postId = {0} and userId = {1}""".format(postId,userId))
+    conn.commit()
+
+    curr.execute("""SELECT * FROM post_has_starts WHERE postId = {0}""".format(postId))
+    postHasStarDataModels = curr.fetchall()
+    starsReponseDto = FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels)
+
+
+    return json.dumps({"message": "delete star success", "stars":starsReponseDto}), 200, {'ContentType':'application/json'}

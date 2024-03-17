@@ -284,4 +284,19 @@ curr.execute("""CREATE TABLE IF NOT EXISTS user_is_notified_by_notification (
 	  ON DELETE CASCADE  
 )""")
 
+
+curr.execute("""CREATE TABLE IF NOT EXISTS post_has_starts (
+    id INTEGER PRIMARY KEY,
+    postId INT NOT NULL,
+    userId INT NOT NULL,
+    CONSTRAINT fk_user
+      FOREIGN KEY(userId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE,
+    CONSTRAINT fk_post
+      FOREIGN KEY(postId) 
+	  REFERENCES posts(id)
+	  ON DELETE CASCADE  
+)""")
+
 conn.commit()

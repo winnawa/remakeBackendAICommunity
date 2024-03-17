@@ -9,7 +9,7 @@ from app.mapper import PostType
 ELASTIC_PASSWORD = "<password>"
 
 document_store = ElasticsearchDocumentStore(
-    host = "54.81.74.69",
+    host = "54.158.213.194",
     port = 9200,
     username="elasticsearch",
     password= ELASTIC_PASSWORD,
@@ -87,7 +87,7 @@ class AutoMatching:
         
         # retrieverOutput = []
         retrieverOutput = embeddingRetrieverPipelineOutput['documents'] if embeddingRetrieverPipelineOutput['documents'] is not None else []
-        retrieverOutput = [document for document in retrieverOutput if document.score > 0.6]
+        # retrieverOutput = [document for document in retrieverOutput if document.score > 0.6]
         # countList = []
         # for document in retrieverOutputWithDuplicate:
         #     if  document.meta['id'] not in countList:

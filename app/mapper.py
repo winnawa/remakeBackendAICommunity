@@ -225,3 +225,10 @@ def FromNotificationDataModelToNotificationReponseDto(notificationDataModel):
             "postId": int(notificationDataModel[4])
         }
     return notificationResponseDto   
+
+def FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels):
+    userId = []
+    for postHasStarDataModel in postHasStarDataModels:
+        print(postHasStarDataModel)
+        userId.append(postHasStarDataModel[2])
+    return userId

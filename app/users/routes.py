@@ -5,7 +5,7 @@ from app.users import bp
 from flask import request
 import json
 from dataConnection import curr, conn
-from app.mapper import FromExperienceDataModelsToExperiencesResponseDto, FromFriendshipJoinUserDataModelsToGetFriendsResponseDto, FromPostDataModelsToGetPostsResponseDto, FromSearchHistoryDataModelToCreateSearchHistoryResponseDto, FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto, FromUserContextDataToSystemContextQuery, FromUserDataModelToUserResponseDto, FromUserResponseDtoToElasticSearchModel, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
+from app.mapper import FromExperienceDataModelsToExperiencesResponseDto, FromFriendshipJoinUserDataModelsToGetFriendsResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostHasStarDataModelsToStarsResponseDto, FromSearchHistoryDataModelToCreateSearchHistoryResponseDto, FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto, FromUserContextDataToSystemContextQuery, FromUserDataModelToUserResponseDto, FromUserResponseDtoToElasticSearchModel, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
 
 @bp.route('/', methods=['POST'])
 def createUser():
@@ -222,6 +222,14 @@ def searchPostsByQuery(userId):
                 sortedGetPostResponseDto.append(post)
                 orderPrecedence.pop(0)
                 break
+
+    for postReponseDto in sortedGetPostResponseDto:
+        # add-on stars
+        curr.execute("""SELECT * FROM post_has_starts WHERE postId = {0}""".format(postReponseDto['id']))
+        postHasStarDataModels = curr.fetchall()
+        starsReponseDto = FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels)
+        
+        postReponseDto['stars'] = starsReponseDto
 
     return json.dumps({"message": "get posts success", "posts":sortedGetPostResponseDto}), 200, {'ContentType':'application/json'}
 
