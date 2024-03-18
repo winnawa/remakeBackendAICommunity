@@ -1,4 +1,5 @@
-from app.mapper import FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostHasStarDataModelsToStarsResponseDto, FromPostResponseDtoToElasticSearchModel, FromPostSkillDataModelsToSkillsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
+from datetime import datetime
+from app.mapper import FromCommentDataModelToCommentReponseDto, FromCommentDataModelsToCommentsResponseDto, FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostHasStarDataModelsToStarsResponseDto, FromPostResponseDtoToElasticSearchModel, FromPostSkillDataModelsToSkillsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
 from app.posts import bp
 from flask import request
 import json
@@ -253,3 +254,72 @@ def deleteStarForPost(postId):
 
 
     return json.dumps({"message": "delete star success", "stars":starsReponseDto}), 200, {'ContentType':'application/json'}
+
+@bp.route('/<postId>/comments', methods=['POST'])
+def createCommentForPost(postId):
+    request_data = request.get_json()
+    createCommentDto = {
+        "userId" : request_data['userId'],
+        "content": request_data['content']
+    }
+        
+    # add createdTime
+    now = datetime.now()
+    date_time = now.strftime("%Y/%m/%d, %H:%M:%S")
+    createCommentDto["createdTime"] = date_time
+
+    # add username
+    curr.execute("""SELECT * FROM users WHERE Id = {0}""".format(createCommentDto["userId"]))
+    userDataModel = curr.fetchone()
+    if userDataModel is None:
+        return json.dumps({"message": "userId not found"}), 404, {'ContentType':'application/json'}
+    username = userDataModel[1]    
+    createCommentDto["username"] = username
+
+    # check post existance
+    curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
+    postDataModel = curr.fetchone()
+    if postDataModel is None:
+        return json.dumps({"message": "post not found"}), 404, {'ContentType':'application/json'}
+    
+    # add-on comment
+    curr.execute("""INSERT INTO comments (postId,userId,content,createdTime,username) VALUES ({0},{1},'{2}','{3}','{4}') """.format(postId,createCommentDto["userId"],createCommentDto["content"],createCommentDto["createdTime"],createCommentDto["username"]))
+    conn.commit()
+
+    curr.execute("""SELECT * FROM comments WHERE postId = {0} and userId = {1} and createdTime = '{2}'""".format(postId, createCommentDto["userId"], createCommentDto["createdTime"]))
+    commentDataModel = curr.fetchone()
+    commentReponseDto = FromCommentDataModelToCommentReponseDto(commentDataModel)
+
+    return json.dumps({"message": "add comment to post success", "newComment":commentReponseDto}), 200, {'ContentType':'application/json'}
+
+@bp.route('/<postId>/comments', methods=['GET'])
+def getCommentsForPost(postId):
+
+    # check post existance
+    curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
+    postDataModel = curr.fetchone()
+    if postDataModel is None:
+        return json.dumps({"message": "post not found"}), 404, {'ContentType':'application/json'}
+    
+    # get comments
+    curr.execute("""SELECT * FROM comments WHERE postId = {0}""".format(postId))
+    commentDataModels = curr.fetchall()
+    commentReponseDto = FromCommentDataModelsToCommentsResponseDto(commentDataModels)
+
+    return json.dumps({"message": "get comments success", "comments":commentReponseDto}), 200, {'ContentType':'application/json'}
+
+
+@bp.route('/<postId>/comments/<commentId>', methods=['DELETE'])
+def deleteCommentsForPost(postId,commentId):
+
+    # check post existance
+    curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
+    postDataModel = curr.fetchone()
+    if postDataModel is None:
+        return json.dumps({"message": "post not found"}), 404, {'ContentType':'application/json'}
+
+    # delete comments
+    curr.execute("""DELETE FROM comments WHERE postId = {0} and id = {1}""".format(postId,commentId))
+    conn.commit()
+
+    return json.dumps({"message": "delete comment success"}), 200, {'ContentType':'application/json'}

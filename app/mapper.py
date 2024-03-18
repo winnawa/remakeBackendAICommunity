@@ -232,3 +232,28 @@ def FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels):
         print(postHasStarDataModel)
         userId.append(postHasStarDataModel[2])
     return userId
+
+def FromCommentDataModelToCommentReponseDto(commentDataModel):
+    commentResponseDto = {
+            "id": int(commentDataModel[0]),
+            "postId": int(commentDataModel[1]),
+            "userId": int(commentDataModel[2]),
+            "content": commentDataModel[3],
+            "createdTime": commentDataModel[4],
+            "username": commentDataModel[5]
+        }
+    return commentResponseDto   
+
+def FromCommentDataModelsToCommentsResponseDto(commentDataModels):
+    comments = []
+    for commentDataModel in commentDataModels:
+        commentResponseDto = {
+            "id": int(commentDataModel[0]),
+            "postId": int(commentDataModel[1]),
+            "userId": int(commentDataModel[2]),
+            "content": commentDataModel[3],
+            "createdTime": commentDataModel[4],
+            "username": commentDataModel[5]
+        }
+        comments.append(commentResponseDto)
+    return comments

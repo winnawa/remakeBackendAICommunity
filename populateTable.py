@@ -299,4 +299,21 @@ curr.execute("""CREATE TABLE IF NOT EXISTS post_has_starts (
 	  ON DELETE CASCADE  
 )""")
 
+curr.execute("""CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY,
+    postId INT NOT NULL,
+    userId INT NOT NULL,
+    content VARCHAR(500) NOT NULL,
+    createdTime VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL, 
+    CONSTRAINT fk_user
+      FOREIGN KEY(userId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE,
+    CONSTRAINT fk_post
+      FOREIGN KEY(postId) 
+	  REFERENCES posts(id)
+	  ON DELETE CASCADE  
+)""")
+
 conn.commit()
