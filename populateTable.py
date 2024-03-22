@@ -91,6 +91,9 @@ curr.execute("""CREATE TABLE IF NOT EXISTS posts (
     datasetProjectInformation VARCHAR(500),
     timelineProjectInformation VARCHAR(500),
              
+    postType VARCHAR(255) NOT NULL,
+    content VARCHAR(500),
+
     CONSTRAINT fk_creator
       FOREIGN KEY(creatorId) 
 	  REFERENCES users(id)
@@ -99,23 +102,23 @@ curr.execute("""CREATE TABLE IF NOT EXISTS posts (
 
 
 
-# curr.execute("""INSERT INTO posts (title,creatorId,privacy,status,projectLink,contactEmail, objectivesProjectInformation, methodologyProjectInformation, datasetProjectInformation, timelineProjectInformation) VALUES 
-#     ("AI-Based Disease Prediction System", 1, NULL, NULL, NULL, NULL,"The aim of this project is to develop a system that uses artificial intelligence to predict the likelihood of diseases based on patient symptoms.", "The project will involve training a deep learning model using patient data. The model will use patient symptoms as input and output the likelihood of various diseases. Techniques such as data preprocessing, model training, and model evaluation will be used.", "The project will use anonymized patient data from public health databases. All data used will comply with relevant data protection and privacy laws.", "The project is expected to take six months, with the first two months dedicated to data collection and preprocessing, the next three months for model development and training, and the final month for testing and evaluation."),
-#     ('Sentiment Analysis of Social Media Comments', 1,NULL, NULL, NULL, NULL,'The goal of this project is to develop an AI system that can accurately determine the sentiment (positive, negative, neutral) of comments on social media platforms.', 'The project will involve training a machine learning model on a dataset of social media comments labeled with their sentiment. Techniques such as text preprocessing, feature extraction, model training, and model evaluation will be used.', 'The project will use publicly available datasets of social media comments. All data used will comply with relevant data protection and privacy laws.', 'The project is expected to take four months, with the first month dedicated to data collection and preprocessing, the next two months for model development and training, and the final month for testing and evaluation.'),
-#     ('Smart Home Automation - Develop an AI-based system that can automate home appliances such as lights, fans, and air conditioners',1,NULL, NULL, NULL, NULL,'The goal of this project is to reduce energy consumption and improve convenience.','Supervised Learning.','Sensor data from home appliances.','3 months.'),
-#     ('Sentiment Analysis - Build an AI model that can analyze the sentiment of social media posts', 1,NULL, NULL, NULL, NULL,'The goal of this project is to understand the public opinion on a particular topic.','Unsupervised Learning.','Social media posts.','2 months.'),
-#     ('Fraud Detection - Create an AI system that can detect fraudulent transactions in real-time', 1,NULL, NULL, NULL, NULL,'The goal of this project is to prevent financial losses.','Semi-Supervised Learning.','Transaction data.','6 months.'),
-#     ('Autonomous Vehicles - Develop an AI-based system that can control autonomous vehicles', 1,NULL, NULL, NULL, NULL,'The goal of this project is to improve road safety and reduce traffic congestion.','Reinforcement Learning.','Sensor data from vehicles.','12 months.'),
-#     ('Chatbot - create an AI-powered chatbot that can assist customers with their queries', 1,NULL, NULL, NULL, NULL,'The goal of this project is to is to improve customer service.','Supervised Learning.','Customer queries.','It might take years to complete the project.'),
-#     ('Autonomous Vehicles - Develop an AI-based system that can control autonomous vehicles', 1,NULL, NULL, NULL, NULL,'The goal of this project is to improve road safety and reduce traffic congestion.','Reinforcement Learning.','Sensor data from vehicles.','12 months.'),
-#     ('Image Recognition - Build an AI model that can recognize objects in images', 1,NULL, NULL, NULL, NULL,'	The goal of this project is to automate image classification.','Convolutional Neural Networks.','Image data.','Two months.'),
-#     ('Recommendation System - Develop an AI-based recommendation system that can suggest products to customers', 1,NULL, NULL, NULL, NULL,'	The goal of this project is to improve sales.','Collaborative Filtering.','Customer purchase history.','Three months.'),
-#     ('Predictive Maintenance - Create an AI system that can predict equipment failures before they occur', 1,NULL, NULL, NULL, NULL,'The goal of this project is to reduce downtime.','Time Series Analysis.','Equipment sensor data.','6 months.'),
-#     ('Speech Recognition - Build an AI model that can transcribe speech to text', 1,NULL, NULL, NULL, NULL,'The goal of this project is to automate speech recognition.','Recurrent Neural Networks.','Audio data.','Two months.'),
-#     ('Medical Diagnosis - Develop an AI-based system that can diagnose medical conditions', 2,NULL, NULL, NULL, NULL,'	The objective of this project is to improve health care.','Deep Learning.','Medical records.','12 months.'),
-#     ('AI-Driven IoT Device Management System For Effiency', 1,NULL, NULL, NULL, NULL,'The goal of this project is to create a system that uses artificial intelligence to manage and optimize the performance of IoT devices.','The project will involve training a machine learning model using data from IoT devices. The model will use device data as input and output optimized device settings. Techniques such as data preprocessing, model training, and model evaluation will be used.','The project will use anonymized device data from public IoT databases. All data used will comply with relevant data protection and privacy laws.','The project is expected to take six months, with the first two months dedicated to data collection and preprocessing, the next three months for model development and training, and the final month for testing and evaluation.'),
-#     ('Chatbot for Answering Frequently Asked Questions (FAQ)', 1, 'public', 'done', 'www.faq.com', 'email@gmail.com','The goal of this project is to create an intelligent chatbot capable of answering common queries and frequently asked questions. By leveraging natural language processing (NLP) techniques, the chatbot will provide accurate and helpful responses to users.','Data Collection: Gather a set of frequently asked questions related to a specific domain (e.g., customer service, technical support, product information). Data Preprocessing: Clean and preprocess the FAQ data by removing noise, tokenizing sentences, and creating a question-answer dataset.','a set of frequently asked questions.','From 2021 to 2022.'),
-#     ('AI in agriculture', 1, 'public', 'in progress', 'www.project-link.com', 'email@gmail.com','Apply AI in agriculture for optimized crop yield, resource efficiency, and precision farming. Analyze soil, weather, and pest data to improve productivity. Optimize irrigation and fertilization for resource conservation. Empower farmers with AI-driven insights for informed decisions.','Collect diverse datasets and employ supervised/unsupervised learning. Develop models for real-time monitoring and decision-making. Rigorous testing ensures reliability in real-world settings.','Comprise soil, weather, satellite, and historical crop data. Soil samples inform about pH, nutrients, and organic matter. Weather data includes temperature, precipitation, and humidity. Satellite imagery monitors vegetation health and field conditions. Historical crop records provide insights into yield, pest incidents, and agronomic practices.','2024-2025.')        
+# curr.execute("""INSERT INTO posts (title,creatorId,privacy,status,projectLink,contactEmail, objectivesProjectInformation, methodologyProjectInformation, datasetProjectInformation, timelineProjectInformation, postType) VALUES 
+#     ("AI-Based Disease Prediction System", 1, NULL, NULL, NULL, NULL,"The aim of this project is to develop a system that uses artificial intelligence to predict the likelihood of diseases based on patient symptoms.", "The project will involve training a deep learning model using patient data. The model will use patient symptoms as input and output the likelihood of various diseases. Techniques such as data preprocessing, model training, and model evaluation will be used.", "The project will use anonymized patient data from public health databases. All data used will comply with relevant data protection and privacy laws.", "The project is expected to take six months, with the first two months dedicated to data collection and preprocessing, the next three months for model development and training, and the final month for testing and evaluation.",'0'),
+#     ('Sentiment Analysis of Social Media Comments', 1,NULL, NULL, NULL, NULL,'The goal of this project is to develop an AI system that can accurately determine the sentiment (positive, negative, neutral) of comments on social media platforms.', 'The project will involve training a machine learning model on a dataset of social media comments labeled with their sentiment. Techniques such as text preprocessing, feature extraction, model training, and model evaluation will be used.', 'The project will use publicly available datasets of social media comments. All data used will comply with relevant data protection and privacy laws.', 'The project is expected to take four months, with the first month dedicated to data collection and preprocessing, the next two months for model development and training, and the final month for testing and evaluation.','0'),
+#     ('Smart Home Automation - Develop an AI-based system that can automate home appliances such as lights, fans, and air conditioners',1,NULL, NULL, NULL, NULL,'The goal of this project is to reduce energy consumption and improve convenience.','Supervised Learning.','Sensor data from home appliances.','3 months.','0'),
+#     ('Sentiment Analysis - Build an AI model that can analyze the sentiment of social media posts', 1,NULL, NULL, NULL, NULL,'The goal of this project is to understand the public opinion on a particular topic.','Unsupervised Learning.','Social media posts.','2 months.','0'),
+#     ('Fraud Detection - Create an AI system that can detect fraudulent transactions in real-time', 1,NULL, NULL, NULL, NULL,'The goal of this project is to prevent financial losses.','Semi-Supervised Learning.','Transaction data.','6 months.','0'),
+#     ('Autonomous Vehicles - Develop an AI-based system that can control autonomous vehicles', 1,NULL, NULL, NULL, NULL,'The goal of this project is to improve road safety and reduce traffic congestion.','Reinforcement Learning.','Sensor data from vehicles.','12 months.','0'),
+#     ('Chatbot - create an AI-powered chatbot that can assist customers with their queries', 1,NULL, NULL, NULL, NULL,'The goal of this project is to is to improve customer service.','Supervised Learning.','Customer queries.','It might take years to complete the project.','0'),
+#     ('Autonomous Vehicles - Develop an AI-based system that can control autonomous vehicles', 1,NULL, NULL, NULL, NULL,'The goal of this project is to improve road safety and reduce traffic congestion.','Reinforcement Learning.','Sensor data from vehicles.','12 months.','0'),
+#     ('Image Recognition - Build an AI model that can recognize objects in images', 1,NULL, NULL, NULL, NULL,'	The goal of this project is to automate image classification.','Convolutional Neural Networks.','Image data.','Two months.','0'),
+#     ('Recommendation System - Develop an AI-based recommendation system that can suggest products to customers', 1,NULL, NULL, NULL, NULL,'	The goal of this project is to improve sales.','Collaborative Filtering.','Customer purchase history.','Three months.','0'),
+#     ('Predictive Maintenance - Create an AI system that can predict equipment failures before they occur', 1,NULL, NULL, NULL, NULL,'The goal of this project is to reduce downtime.','Time Series Analysis.','Equipment sensor data.','6 months.','0'),
+#     ('Speech Recognition - Build an AI model that can transcribe speech to text', 1,NULL, NULL, NULL, NULL,'The goal of this project is to automate speech recognition.','Recurrent Neural Networks.','Audio data.','Two months.','0'),
+#     ('Medical Diagnosis - Develop an AI-based system that can diagnose medical conditions', 2,NULL, NULL, NULL, NULL,'	The objective of this project is to improve health care.','Deep Learning.','Medical records.','12 months.','0'),
+#     ('AI-Driven IoT Device Management System For Effiency', 1,NULL, NULL, NULL, NULL,'The goal of this project is to create a system that uses artificial intelligence to manage and optimize the performance of IoT devices.','The project will involve training a machine learning model using data from IoT devices. The model will use device data as input and output optimized device settings. Techniques such as data preprocessing, model training, and model evaluation will be used.','The project will use anonymized device data from public IoT databases. All data used will comply with relevant data protection and privacy laws.','The project is expected to take six months, with the first two months dedicated to data collection and preprocessing, the next three months for model development and training, and the final month for testing and evaluation.','0'),
+#     ('Chatbot for Answering Frequently Asked Questions (FAQ)', 1, 'public', 'done', 'www.faq.com', 'email@gmail.com','The goal of this project is to create an intelligent chatbot capable of answering common queries and frequently asked questions. By leveraging natural language processing (NLP) techniques, the chatbot will provide accurate and helpful responses to users.','Data Collection: Gather a set of frequently asked questions related to a specific domain (e.g., customer service, technical support, product information). Data Preprocessing: Clean and preprocess the FAQ data by removing noise, tokenizing sentences, and creating a question-answer dataset.','a set of frequently asked questions.','From 2021 to 2022.','0'),
+#     ('AI in agriculture', 1, 'public', 'in progress', 'www.project-link.com', 'email@gmail.com','Apply AI in agriculture for optimized crop yield, resource efficiency, and precision farming. Analyze soil, weather, and pest data to improve productivity. Optimize irrigation and fertilization for resource conservation. Empower farmers with AI-driven insights for informed decisions.','Collect diverse datasets and employ supervised/unsupervised learning. Develop models for real-time monitoring and decision-making. Rigorous testing ensures reliability in real-world settings.','Comprise soil, weather, satellite, and historical crop data. Soil samples inform about pH, nutrients, and organic matter. Weather data includes temperature, precipitation, and humidity. Satellite imagery monitors vegetation health and field conditions. Historical crop records provide insights into yield, pest incidents, and agronomic practices.','2024-2025.','0')        
 # """)
 
 
@@ -134,6 +137,14 @@ curr.execute("""CREATE TABLE IF NOT EXISTS posts_has_skills (
 )""")
 
 # curr.execute("""INSERT INTO posts_has_skills (postId,skillId) VALUES 
+#     (1,1),
+#     (1,2),
+#     (1,6),
+#     (1,10),
+#     (2,1),
+#     (2,12),
+#     (2,5),
+#     (2,6),
 #     (3,1),
 #     (3,6),
 #     (3,11),
@@ -188,7 +199,16 @@ curr.execute("""CREATE TABLE IF NOT EXISTS posts_has_skills (
 #     (15,4),
 #     (14,6),
 #     (14,2),
-#     (14,15)
+#     (14,15),
+#     (15,6),
+#     (15,4),
+#     (15,2),
+#     (15,15),
+#     (15,5),
+#     (16,6),
+#     (16,7),
+#     (16,8),
+#     (16,10) 
 # """)
 
 curr.execute("""CREATE TABLE IF NOT EXISTS experiences (

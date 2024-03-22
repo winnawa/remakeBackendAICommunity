@@ -2,6 +2,6 @@
 
 # curr = conn.cursor()
 
-# curr.execute("""DROP TABLE notifications """)
+# curr.execute("""drop table posts""")
 
 # conn.commit()

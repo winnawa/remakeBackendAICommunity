@@ -200,7 +200,8 @@ def searchPostsByQuery(userId):
         contextQuery = FromUserContextDataToSystemContextQuery(userContextData)
 
     filterParam = {
-        "postType": PostType.project.value
+        "postType": PostType.project.value,
+        "creatorId": {"$ne": "{}".format(userId)}
     }
     documents = AutoMatching.searchDocuments(queryString, contextQuery, filterParam)
     postIds= []

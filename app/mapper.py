@@ -5,6 +5,8 @@ from enum import Enum
 class PostType(Enum):
     project = '0'
     userProfile = '1'
+    article = '2'
+    event = '3'
 
 class NotificationType(Enum):
     projectCreation = '0'
@@ -48,7 +50,8 @@ def FromPostDataModelToPostResponseDto(postDataModel: tuple[Any, ...]):
         "objectivesProjectInformation": postDataModel[7],
         "methodologyProjectInformation": postDataModel[8],
         "datasetProjectInformation": postDataModel[9],
-        "timelineProjectInformation": postDataModel[10]
+        "timelineProjectInformation": postDataModel[10],
+        "postType": postDataModel[11]
     }
     return postDto 
 
@@ -64,20 +67,23 @@ def FromPostResponseDtoToElasticSearchModel(postReponseDto):
         postContent = postContent + "Dataset Information: " + postReponseDto["datasetProjectInformation"]
     if postReponseDto["timelineProjectInformation"] is not None:
         postContent = postContent + "Project Timeline: " + postReponseDto["timelineProjectInformation"]
-    if postReponseDto["skills"] is not None and len(postReponseDto["skills"]) > 0:
+    if "skills" in postReponseDto and postReponseDto["skills"] is not None and len(postReponseDto["skills"]) > 0:
         skillsContent = ""
         for skill in postReponseDto["skills"]:
             skillsContent = skillsContent + skill["skillName"] + ", "
         postContent = postContent + "Skills: " + skillsContent[:-2] + "."
 
+    postTypeValue = str(postReponseDto['postType']) if 'postType' in postReponseDto else PostType.project.value    
+    postTypeName = PostType(str(postReponseDto["postType"])).name if "postType" in postReponseDto else PostType.project.name
+
     return {
         'content' : postContent,
         'meta' : {
             'id' : str(postReponseDto['id']),
-            'postType': PostType.project.value,
+            'postType': postTypeValue,
             'creatorId': str(postReponseDto["creatorId"])
         },
-        'id': "{0}_{1}".format(PostType.project.name, postReponseDto['id'])
+        'id': "{0}_{1}".format(postTypeName, postReponseDto['id'])
     }
 
 def FromUserResponseDtoToElasticSearchModel(userReponseDto):

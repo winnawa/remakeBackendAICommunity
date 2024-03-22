@@ -341,7 +341,8 @@ postsSqlite = [
         'content': """Project Title: AI-Based Disease Prediction System.Project Objectives: The aim of this project is to develop a system that uses artificial intelligence to predict the likelihood of diseases based on patient symptoms.Project Methodology:  The project will involve training a deep learning model using patient data. The model will use patient symptoms as input and output the likelihood of various diseases. Techniques such as data preprocessing, model training, and model evaluation will be used.Dataset Information: The project will use anonymized patient data from public health databases. All data used will comply with relevant data protection and privacy laws.Project Timeline: The project is expected to take six months, with the first two months dedicated to data collection and preprocessing, the next three months for model development and training, and the final month for testing and evaluation.Skills: Machine Learning, Deep Learning, Python, Data Analysis.""",
         'meta' : {
             'id' : '1',
-            'postType' : '0'
+            'postType' : '0',
+            'creatorId': '1'
         }
     },
     {
@@ -349,7 +350,8 @@ postsSqlite = [
         'content': """Project Title: Sentiment Analysis of Social Media Comments.Project Objectives: The goal of this project is to develop an AI system that can accurately determine the sentiment (positive, negative, neutral) of comments on social media platforms.Project Methodology: The project will involve training a machine learning model on a dataset of social media comments labeled with their sentiment. Techniques such as text preprocessing, feature extraction, model training, and model evaluation will be used.Dataset Information: The project will use publicly available datasets of social media comments. All data used will comply with relevant data protection and privacy laws.Project Timeline: The project is expected to take four months, with the first month dedicated to data collection and preprocessing, the next two months for model development and training, and the final month for testing and evaluation.Skills: Natural Language Processing, Machine Learning, Data Mining, Python.""",
         'meta' : {
             'id' : '2',
-            'postType' : '0'
+            'postType' : '0',
+            'creatorId': '1'
         }
     },
     {
@@ -357,7 +359,8 @@ postsSqlite = [
         'content': """Project Title: Smart Home Automation - Develop an AI-based system that can automate home appliances such as lights, fans, and air conditioners.Project Objectives: The goal of this project is to reduce energy consumption and improve convenience.Project Methodology: Supervised Learning.Dataset Information: Sensor data from home appliances.Project Timeline: 3 months.Skills: Machine Learning, Python, Raspberry Pi, IoT, Arduino, TensorFlow.""",
         'meta' : {
             'id' : '3',
-            'postType' : '0'
+            'postType' : '0',
+            'creatorId': '1'
         }
     },
     {
@@ -365,7 +368,8 @@ postsSqlite = [
         'content': """Project Title: Sentiment Analysis - Build an AI model that can analyze the sentiment of social media posts.Project Objectives: The goal of this project is to understand the public opinion on a particular topic.Project Methodology: Unsupervised Learning.Dataset Information: Social media posts.Project Timeline: 2 months.Skills: Natural Language Processing, Python, Scikit-learn, NLTK.""",
         'meta' : {
             'id' : '4',
-            'postType' : '0'
+            'postType' : '0',
+            'creatorId': '1'
         }
     },
     {
@@ -373,7 +377,8 @@ postsSqlite = [
         'content': """Project Title: Fraud Detection - Create an AI system that can detect fraudulent transactions in real-time.Project Objectives: The goal of this project is to prevent financial losses.Project Methodology: TSemi-Supervised Learning.Dataset Information: Transaction data.Project Timeline: 6 months.Skills: Machine Learning, Python, Hadoop, Data Science, Apache Spark, TensorFlow.""",
         'meta' : {
             'id' : '5',
-            'postType' : '0'
+            'postType' : '0',
+            'creatorId': '1'
         }
     },
     {
@@ -381,7 +386,8 @@ postsSqlite = [
         'content': """Project Title: Autonomous Vehicles - Develop an AI-based system that can control autonomous vehicles.Project Objectives: The goal of this project is to improve road safety and reduce traffic congestion.Project Methodology: Reinforcement Learning.Dataset Information: Sensor data from vehicles.Project Timeline: 12 months.Skills: Machine Learning, Python, Robotics, TensorFlow.""",
         'meta' : {
             'id' : '6',
-            'postType' : '0'
+            'postType' : '0',
+            'creatorId': '1'
         }
     },
     {
@@ -389,7 +395,8 @@ postsSqlite = [
         'content': """Project Title: Chatbot - create an AI-powered chatbot that can assist customers with their queries.Project Objectives: The goal of this project is to is to improve customer service.Project Methodology: Supervised Learning.Dataset Information: Customer queries.Project Timeline: It might take years to complete the project.Skills: Machine Learning, Natural Language Processing, Deep Learning, TensorFlow, Dialogflow.""",
         'meta' : {
             'id' : '7',
-            'postType' : '0'
+            'postType' : '0',
+            'creatorId': '1'
         }
     },
     {
@@ -397,7 +404,8 @@ postsSqlite = [
         'content': """"Project Title: Image Recognition - Build an AI model that can recognize objects in images.Project Objectives: The goal of this project is to automate image classification.Project Methodology: Convolutional Neural Networks.Dataset Information: Image dataProject Timeline: Two monthsSkills: Python, Machine Learning, Computer Vision.""",
         'meta' : {
             'id' : '9',
-            'postType': '0'
+            'postType': '0',
+            'creatorId': '1'
         }
     },
     {
@@ -405,7 +413,8 @@ postsSqlite = [
         'content': """"Project Title: Recommendation System - Develop an AI-based recommendation system that can suggest products to customers.Project Objectives: The goal of this project is to improve sales.Project Methodology: Collaborative Filtering.Dataset Information: Customer purchase history.Project Timeline: Two months.Skills: Python, Machine Learning, Data Science.""",
         'meta' : {
             'id' : '10',
-            'postType': '0'
+            'postType': '0',
+            'creatorId': '1'
         }
     },
     {
@@ -413,7 +422,8 @@ postsSqlite = [
         'content': """"Project Title: Predictive Maintenance - Create an AI system that can predict equipment failures before they occur.Project Objectives: The goal of this project is to reduce downtime.Project Methodology: Time Series Analysis.Dataset Information: Equipment sensor data.Project Timeline: Two months.Skills: Python, Machine Learning, Data Science, Apache Spark, Hadoop, TensorFlow.""",
         'meta' : {
             'id' : '11',
-            'postType': '0'
+            'postType': '0',
+            'creatorId': '1'
         }
     },
     {
@@ -421,7 +431,8 @@ postsSqlite = [
         'content': """"Project Title: Speech Recognition - Build an AI model that can transcribe speech to text.Project Objectives: The goal of this project is to automate speech recognition.Project Methodology: Recurrent Neural Networks.Dataset Information: Audio data.Project Timeline: Two months.Skills: Python, Machine Learning, Natural Language Processing.""",
         'meta' : {
             'id' : '12',
-            'postType': '0'
+            'postType': '0',
+            'creatorId': '1'
         }
     },
     {
@@ -429,7 +440,8 @@ postsSqlite = [
         'content': """"Project Title: Medical Diagnosis - Develop an AI-based system that can diagnose medical conditions.Project Objectives: The objective of this project is to improve health care.Project Methodology: Deep Learning.Dataset Information: Medical records.Project Timeline: 12 months.Skills: Python, Machine Learning, Data Science, Keras, TensorFlow.""",
         'meta' : {
             'id' : '13',
-            'postType': '0'
+            'postType': '0',
+            'creatorId': '2'
         }
     },
     {
@@ -438,7 +450,8 @@ postsSqlite = [
         Skills: Python, Machine Learning, Data Science, Keras, TensorFlow.""",
         'meta' : {
             'id' : '14',
-            'postType': '0'
+            'postType': '0',
+            'creatorId': '1'
         }
     },
     {
@@ -447,7 +460,8 @@ postsSqlite = [
 Data Preprocessing: Clean and preprocess the FAQ data by removing noise, tokenizing sentences, and creating a question-answer dataset.Dataset Information: a set of frequently asked questionsProject Timeline: From 2021 to 2022Skills: Natural Language Processing, Python, Keras, Deep Learning, TensorFlow.""",
         'meta' : {
             'id' : '15',
-            'postType': '0'
+            'postType': '0',
+            'creatorId': '1'
         }
     },
     {
@@ -455,7 +469,17 @@ Data Preprocessing: Clean and preprocess the FAQ data by removing noise, tokeniz
         'content': """"Project Title: AI in agriculture.Project Objectives: Apply AI in agriculture for optimized crop yield, resource efficiency, and precision farming. Analyze soil, weather, and pest data to improve productivity. Optimize irrigation and fertilization for resource conservation. Empower farmers with AI-driven insights for informed decisions.Project Methodology: Collect diverse datasets and employ supervised/unsupervised learning. Develop models for real-time monitoring and decision-making. Rigorous testing ensures reliability in real-world settings.Dataset Information: Comprise soil, weather, satellite, and historical crop data. Soil samples inform about pH, nutrients, and organic matter. Weather data includes temperature, precipitation, and humidity. Satellite imagery monitors vegetation health and field conditions. Historical crop records provide insights into yield, pest incidents, and agronomic practices.Project Timeline: 2024-2025Skills: Pandas, Python, Numpy, Data Analysis.""",
         'meta' : {
             'id' : '16',
-            'postType': '0'
+            'postType': '0',
+            'creatorId': '1'
+        }
+    },
+    {
+        'id': 'article_17',
+        'content': """"Project Title: To discuss the AI opportunity in 2024.""",
+        'meta' : {
+            'id' : '17',
+            'postType': '2',
+            'creatorId': '1'
         }
     }
 ]

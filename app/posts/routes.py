@@ -29,7 +29,7 @@ def createPost():
     curr.execute(insertPostQuery)
     conn.commit()
 
-    curr.execute("""SELECT * FROM posts WHERE title = '{0}' and creatorId = {1}""".format(createPostDto["title"],createPostDto["creatorId"]))
+    curr.execute("""SELECT * FROM posts WHERE title = '{0}' and creatorId = {1} and postType ='{2}'""".format(createPostDto["title"],createPostDto["creatorId"], createPostDto["postType"]))
     postDataModel = curr.fetchone()
     postReponseDto = FromPostDataModelToPostResponseDto(postDataModel)
 
@@ -40,18 +40,20 @@ def createPost():
         conn.commit()
     
     # add-on skills
-    curr.execute("""SELECT * FROM posts_has_skills as PHS JOIN skills as S ON PHS.skillId = S.id 
-                 WHERE PHS.postId = {0}""".format(postReponseDto["id"])) 
-    postSkillJoinSkillDataModels = curr.fetchall()
-    skillsDetailReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels)
-    postReponseDto["skills"] = skillsDetailReponseDto
+    if createPostDto["postType"] == str(PostType.project.value):
+        curr.execute("""SELECT * FROM posts_has_skills as PHS JOIN skills as S ON PHS.skillId = S.id 
+                    WHERE PHS.postId = {0}""".format(postReponseDto["id"])) 
+        postSkillJoinSkillDataModels = curr.fetchall()
+        skillsDetailReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels)
+        postReponseDto["skills"] = skillsDetailReponseDto
 
     # index to elasticsearch
     postElasticSearchModel = FromPostResponseDtoToElasticSearchModel(postReponseDto)
     AutoMatching.indexNewData([postElasticSearchModel])
 
+    postTypeName = PostType(str(createPostDto["postType"])).name
     filterParam = {
-        "_id": "{0}_{1}".format(PostType.project.name, postReponseDto["id"])
+        "_id": "{0}_{1}".format(postTypeName, postReponseDto["id"])
     }
     AutoMatching.updateEmbeddingNewData(filterParam, True)
 
@@ -167,13 +169,30 @@ def updatePostDetails(postId):
 @bp.route('/', methods=['GET'])
 def getPosts():
     creatorId = int(request.args.get('creatorId')) if request.args.get('creatorId') is not None else None
+    postType = str(request.args.get('postType')) if request.args.get('postType') is not None else None
 
     page = int(request.args.get('page')) if request.args.get('page') is not None else 0
     size = int(request.args.get('size')) if request.args.get('size') is not None else 10
 
-    queryString = """SELECT * FROM posts LIMIT 100""" 
-    if creatorId is not None:
-        queryString = """SELECT * FROM posts WHERE creatorId = {}""".format(creatorId) 
+    queryString = """SELECT * FROM posts """
+
+    if postType or creatorId is not None:
+        queryString += "WHERE "
+        isFirstParam = True
+        for key in request.args.keys():
+            if key == "postType" :
+                if not isFirstParam:
+                    queryString += " and "
+                queryString += """postType = '{}' """.format(postType)    
+            if key == "creatorId":
+                if not isFirstParam:
+                    queryString += " and "
+                queryString += """creatorId = {} """.format(creatorId)  
+            if isFirstParam:
+                isFirstParam = False
+    queryString += """ORDER BY Id DESC""" 
+
+    print(queryString)
 
     curr.execute(queryString)
     postsDataModels = curr.fetchall()
