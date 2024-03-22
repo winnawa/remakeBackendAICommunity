@@ -286,7 +286,7 @@ def createCommentForPost(postId):
     curr.execute("""INSERT INTO comments (postId,userId,content,createdTime,username) VALUES ({0},{1},'{2}','{3}','{4}') """.format(postId,createCommentDto["userId"],createCommentDto["content"],createCommentDto["createdTime"],createCommentDto["username"]))
     conn.commit()
 
-    curr.execute("""SELECT * FROM comments WHERE postId = {0} and userId = {1} and createdTime = '{2}'""".format(postId, createCommentDto["userId"], createCommentDto["createdTime"]))
+    curr.execute("""SELECT * FROM comments WHERE postId = {0} and userId = {1} and createdTime = '{2}' ORDER BY createdTime DESC """.format(postId, createCommentDto["userId"], createCommentDto["createdTime"]))
     commentDataModel = curr.fetchone()
     commentReponseDto = FromCommentDataModelToCommentReponseDto(commentDataModel)
 
