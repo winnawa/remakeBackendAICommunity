@@ -1,5 +1,5 @@
 from app.elasticSearchConnection import AutoMatching
-from app.mapper import FromNotificationDataModelToNotificationReponseDto, FromSkillDataModelsToGetSkillsResponseDto, NotificationType, PostType
+from app.mapper import FromNotificationDataModelToNotificationReponseDto, FromNotificationDataModelsToNotificationsReponseDto, FromSkillDataModelsToGetSkillsResponseDto, NotificationType, PostType
 from app.notifications import bp
 from flask import request
 import json
@@ -25,6 +25,9 @@ def createNotification():
         # require postId
         postId = createNotificationDto["postId"]
         postDocument = AutoMatching.getDocumentById(postId,PostType.project)
+        if postDocument is None:
+            return json.dumps({"message": "project matching postId not found"}), 404, {'ContentType':'application/json'}
+
         postContent = postDocument.content
         creatorId = postDocument.meta["creatorId"] if "creatorId" in postDocument.meta else "0"
 
@@ -40,7 +43,7 @@ def createNotification():
         conn.commit()
 
         # need to take in DESC order
-        curr.execute("""SELECT * FROM notifications WHERE type = '{0}' and notificationDescription = '{1}' and createdTime = '{2}'""".format(createNotificationDto["type"], createNotificationDto["notificationDescription"], createNotificationDto["createdTime"]))
+        curr.execute("""SELECT * FROM notifications WHERE type = '{0}' and notificationDescription = '{1}' and createdTime = '{2}' ORDER BY createdTime DESC""".format(createNotificationDto["type"], createNotificationDto["notificationDescription"], createNotificationDto["createdTime"]))
         notificationDataModel = curr.fetchone()
         notificationReponseDto = FromNotificationDataModelToNotificationReponseDto(notificationDataModel)
       
@@ -54,14 +57,13 @@ def createNotification():
         socketio.emit("{}".format(NotificationType.projectCreation.name), {'message': notificationReponseDto})
     
     
-    return json.dumps({"message": "create notification success", "notification":{}}), 200, {'ContentType':'application/json'}
+    return json.dumps({"message": "create notification success", "notification":notificationReponseDto}), 200, {'ContentType':'application/json'}
 
 @bp.route('/', methods=['GET'])
 def getNotifications():
-    curr.execute("""SELECT * FROM skills LIMIT 100""")
-    skillDataModels = curr.fetchall()
+    # need to take in DESC order
+    curr.execute("""SELECT * FROM notifications ORDER BY createdTime DESC""")
+    notificationDataModels = curr.fetchall()
+    notificationsReponseDto = FromNotificationDataModelsToNotificationsReponseDto(notificationDataModels)
 
-    getSkillsResponseDto = FromSkillDataModelsToGetSkillsResponseDto(skillDataModels)
-
-
-    return json.dumps({"message": "get posts success", "skills":getSkillsResponseDto}), 200, {'ContentType':'application/json'}
+    return json.dumps({"message": "get notifications success", "notifications":notificationsReponseDto}), 200, {'ContentType':'application/json'}

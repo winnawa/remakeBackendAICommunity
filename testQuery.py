@@ -1,7 +1,7 @@
-# from dataConnection import conn
+from dataConnection import conn
 
-# curr = conn.cursor()
+curr = conn.cursor()
 
-# curr.execute("""drop table posts""")
+curr.execute("""delete from users where Id = 6""")
 
-# conn.commit()
+conn.commit()

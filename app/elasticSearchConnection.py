@@ -9,7 +9,7 @@ from app.mapper import PostType
 ELASTIC_PASSWORD = "<password>"
 
 document_store = ElasticsearchDocumentStore(
-    host = "54.209.206.59",
+    host = "23.23.65.176",
     port = 9200,
     username="elasticsearch",
     password= ELASTIC_PASSWORD,
@@ -39,12 +39,9 @@ class AutoMatching:
     @staticmethod
     def getDocumentById(postId, postType:PostType):
         document = None
-        if postType == PostType.project:
-            postId = int(postId)
-            document = AutoMatching.document_store.get_document_by_id("{0}_{1}".format(PostType.project.name, postId))
-        if postType == PostType.userProfile:
-            postId = int(postId)
-            document = AutoMatching.document_store.get_document_by_id("{0}_{1}".format(PostType.userProfile.name, postId))            
+
+        postId = int(postId)
+        document = AutoMatching.document_store.get_document_by_id("{0}_{1}".format(postType.name, postId))
 
         return document
     
@@ -135,3 +132,12 @@ class AutoMatching:
         # retrieverOutput = [document for document in retrieverOutput if document.score > 0.6]
         return result
 
+    @staticmethod
+    def deleteDocument(postResponseDto):
+        
+        postTypeName = PostType(str(postResponseDto["postType"])).name if "postType" in postResponseDto else PostType.project.name
+        postId = "{0}_{1}".format(postTypeName,postResponseDto["id"])
+
+        indexName = "document",
+        ids= [postId]
+        document_store.delete_documents(index=indexName,ids=ids)

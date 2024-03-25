@@ -18,11 +18,11 @@ GET /document/_search
     }
 }
 
-POST /my-index-000001/_delete_by_query
+POST /document/_delete_by_query
 {
   "query": {
     "match": {
-      "user.id": "elkbee"
+      "postType": "1"
     }
   }
 }

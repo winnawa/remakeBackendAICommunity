@@ -244,6 +244,13 @@ def searchOtherUsersByQuery(userId):
     if postId is not None:
         postId = int(postId)
         document = AutoMatching.getDocumentById(postId, PostType.project)
+        if document is None:
+            document = AutoMatching.getDocumentById(postId, PostType.article)
+        if document is None:
+            document = AutoMatching.getDocumentById(postId, PostType.event)
+        if document is None:
+            return  json.dumps({"message": "no post matching postId"}), 400, {'ContentType':'application/json'}
+
         contextQuery = document.content
   
     filterParam = {

@@ -174,7 +174,9 @@ def FromPostDataModelsToGetPostsResponseDto(postDataModels: list[tuple[Any, ...]
             "objectivesProjectInformation": postDataModel[7],
             "methodologyProjectInformation": postDataModel[8],
             "datasetProjectInformation": postDataModel[9],
-            "timelineProjectInformation": postDataModel[10]
+            "timelineProjectInformation": postDataModel[10],
+            "postType": postDataModel[11],
+            "content": postDataModel[12]
         }
         posts.append(postDto)
     return posts
@@ -231,6 +233,19 @@ def FromNotificationDataModelToNotificationReponseDto(notificationDataModel):
             "postId": int(notificationDataModel[4])
         }
     return notificationResponseDto   
+
+def FromNotificationDataModelsToNotificationsReponseDto(notificationDataModels):
+    notifications = []
+    for notificationDataModel in notificationDataModels:
+        notificationResponseDto = {
+                "id": int(notificationDataModel[0]),
+                "createdTime": notificationDataModel[1],
+                "notificationDescription": notificationDataModel[2],
+                "type": int(notificationDataModel[3]),
+                "postId": int(notificationDataModel[4])
+            }
+        notifications.append(notificationResponseDto)
+    return notifications 
 
 def FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels):
     userId = []

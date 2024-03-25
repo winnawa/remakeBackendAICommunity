@@ -342,3 +342,20 @@ def deleteCommentsForPost(postId,commentId):
     conn.commit()
 
     return json.dumps({"message": "delete comment success"}), 200, {'ContentType':'application/json'}
+
+    
+@bp.route('/<postId>', methods=['DELETE'])
+def deletePost(postId):
+
+    # check post existance
+    curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
+    postDataModel = curr.fetchone()
+   
+    # delete post
+    curr.execute("""DELETE FROM posts WHERE id = {}""".format(postId))
+    conn.commit()
+
+    postResponseDto = FromPostDataModelToPostResponseDto(postDataModel)
+    AutoMatching.deleteDocument(postResponseDto)
+
+    return json.dumps({"message": "delete post success"}), 200, {'ContentType':'application/json'}
