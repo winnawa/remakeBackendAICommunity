@@ -51,7 +51,8 @@ def FromPostDataModelToPostResponseDto(postDataModel: tuple[Any, ...]):
         "methodologyProjectInformation": postDataModel[8],
         "datasetProjectInformation": postDataModel[9],
         "timelineProjectInformation": postDataModel[10],
-        "postType": postDataModel[11]
+        "postType": postDataModel[11],
+        "content": postDataModel[12]
     }
     return postDto 
 
