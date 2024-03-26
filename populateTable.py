@@ -94,6 +94,10 @@ curr.execute("""CREATE TABLE IF NOT EXISTS posts (
     postType VARCHAR(255) NOT NULL,
     content VARCHAR(500),
 
+    eventStartDate VARCHAR(255),         
+    isEventDisabled INT,
+    imgUrl VARCHAR(500),
+
     CONSTRAINT fk_creator
       FOREIGN KEY(creatorId) 
 	  REFERENCES users(id)
@@ -326,6 +330,36 @@ curr.execute("""CREATE TABLE IF NOT EXISTS comments (
     content VARCHAR(500) NOT NULL,
     createdTime VARCHAR(255) NOT NULL,
     username VARCHAR(255) NOT NULL, 
+    CONSTRAINT fk_user
+      FOREIGN KEY(userId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE,
+    CONSTRAINT fk_post
+      FOREIGN KEY(postId) 
+	  REFERENCES posts(id)
+	  ON DELETE CASCADE  
+)""")
+
+curr.execute("""CREATE TABLE IF NOT EXISTS events_has_users (
+    id INTEGER PRIMARY KEY,
+    postId INT NOT NULL,
+    userId INT NOT NULL,
+    CONSTRAINT fk_user
+      FOREIGN KEY(userId) 
+	  REFERENCES users(id)
+	  ON DELETE CASCADE,
+    CONSTRAINT fk_post
+      FOREIGN KEY(postId) 
+	  REFERENCES posts(id)
+	  ON DELETE CASCADE  
+)""")
+
+curr.execute("""CREATE TABLE IF NOT EXISTS projects_has_users (
+    id INTEGER PRIMARY KEY,
+    postId INT NOT NULL,
+    userId INT NOT NULL,
+    contributionDescription VARCHAR(500),
+    position VARCHAR(255) ,                          
     CONSTRAINT fk_user
       FOREIGN KEY(userId) 
 	  REFERENCES users(id)
