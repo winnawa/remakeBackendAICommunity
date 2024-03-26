@@ -52,7 +52,10 @@ def FromPostDataModelToPostResponseDto(postDataModel: tuple[Any, ...]):
         "datasetProjectInformation": postDataModel[9],
         "timelineProjectInformation": postDataModel[10],
         "postType": postDataModel[11],
-        "content": postDataModel[12]
+        "content": postDataModel[12],
+        "eventStartDate": postDataModel[13],
+        "isEventDisabled": postDataModel[14],
+        "imgUrl": postDataModel[15]
     }
     return postDto 
 
@@ -177,7 +180,10 @@ def FromPostDataModelsToGetPostsResponseDto(postDataModels: list[tuple[Any, ...]
             "datasetProjectInformation": postDataModel[9],
             "timelineProjectInformation": postDataModel[10],
             "postType": postDataModel[11],
-            "content": postDataModel[12]
+            "content": postDataModel[12],
+            "eventStartDate": postDataModel[13],
+            "isEventDisabled": postDataModel[14],
+            "imgUrl": postDataModel[15]
         }
         posts.append(postDto)
     return posts
@@ -279,3 +285,40 @@ def FromCommentDataModelsToCommentsResponseDto(commentDataModels):
         }
         comments.append(commentResponseDto)
     return comments
+
+def FromEventPostHasUserJoinsUserDataModelsToEventParticipantsResponseDto(eventPostHasUserJoinsUserDataModels):
+    participants = []
+    for eventPostHasUserJoinsUserDataModel in eventPostHasUserJoinsUserDataModels:
+        participantResponseDto = {
+            "id": int(eventPostHasUserJoinsUserDataModel[3]),
+            "username": eventPostHasUserJoinsUserDataModel[4],
+            "email": eventPostHasUserJoinsUserDataModel[6]
+        }
+        participants.append(participantResponseDto)
+    return participants
+
+def FromParticipationDataModelToParticipationResponseDto(participationDataModel):
+    participationResponseDto = {
+            "id": int(participationDataModel[0]),
+            "postId": int(participationDataModel[1]),
+            "userId": int(participationDataModel[2]),
+            "contributionDescription": participationDataModel[3],
+            "position": participationDataModel[4]
+        }
+    return participationResponseDto 
+
+def FromProjectPostHasUserJoinsUserDataModelsToProjectParticipantsResponseDto(projectPostHasUserJoinsUserDataModels):
+    participants = []
+    for projectPostHasUserJoinsUserDataModel in projectPostHasUserJoinsUserDataModels:
+        # print(projectPostHasUserJoinsUserDataModel)
+        participantResponseDto = {
+            "id": int(projectPostHasUserJoinsUserDataModel[0]),
+            "postId": int(projectPostHasUserJoinsUserDataModel[1]),
+            "userId": int(projectPostHasUserJoinsUserDataModel[2]),
+            "contributionDescription": projectPostHasUserJoinsUserDataModel[3],
+            "position": projectPostHasUserJoinsUserDataModel[4],
+            "username": projectPostHasUserJoinsUserDataModel[6],
+            "email": projectPostHasUserJoinsUserDataModel[8]
+        }
+        participants.append(participantResponseDto)
+    return participants

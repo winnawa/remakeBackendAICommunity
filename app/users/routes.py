@@ -257,6 +257,15 @@ def searchOtherUsersByQuery(userId):
         "postType": PostType.userProfile.value,
         "id": {"$ne": "{}".format(userId)}
     }
+    # exclude user from this project
+    if postId is not None:
+        excludeIds = document.meta["participants"] if "participants" in document.meta else []
+        print(excludeIds)
+        filterParam = {
+            "postType": PostType.userProfile.value,
+            "id": {"$nin": excludeIds}
+        }
+
     documents = AutoMatching.searchDocuments(queryString, contextQuery, filterParam)
     userIds= []
     sortedGetUserResponseDto= []
@@ -432,6 +441,7 @@ def getUserFriends(userId):
             # filter option here
             filterParam = {
                 "postType": PostType.userProfile.value,
+                # need to have friends in common
                 "friendIds": friendIds,
                 "id": {"$nin": excludeIds}
             }

@@ -2,6 +2,6 @@ from dataConnection import conn
 
 curr = conn.cursor()
 
-curr.execute("""delete from users where Id = 6""")
+curr.execute("""DELETE FROM projects_has_users;""")
 
 conn.commit()

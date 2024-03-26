@@ -140,8 +140,38 @@ def generateUpdatePostQuery(postId, updatePostDetailsDto):
         prefixQuery += ", contactEmail = '{}'".format(updatePostDetailsDto["contactEmail"])
     else:
         prefixQuery += ", contactEmail = NULL"
+    if updatePostDetailsDto["content"] is not None:
+        prefixQuery += ", content = '{}'".format(updatePostDetailsDto["content"])
+    else:
+        prefixQuery += ", content = NULL"
+    if updatePostDetailsDto["isEventDisabled"] is not None:
+        prefixQuery += ", isEventDisabled = '{}'".format(updatePostDetailsDto["isEventDisabled"])
+    else:
+        prefixQuery += ", isEventDisabled = NULL"
+
+    if updatePostDetailsDto["objectivesProjectInformation"] is not None:
+        prefixQuery += ", objectivesProjectInformation = '{}'".format(updatePostDetailsDto["objectivesProjectInformation"])
+    else:
+        prefixQuery += ", objectivesProjectInformation = NULL"   
+
+    if updatePostDetailsDto["methodologyProjectInformation"] is not None:
+        prefixQuery += ", methodologyProjectInformation = '{}'".format(updatePostDetailsDto["methodologyProjectInformation"])
+    else:
+        prefixQuery += ", methodologyProjectInformation = NULL"      
+
+    if updatePostDetailsDto["datasetProjectInformation"] is not None:
+        prefixQuery += ", datasetProjectInformation = '{}'".format(updatePostDetailsDto["datasetProjectInformation"])
+    else:
+        prefixQuery += ", datasetProjectInformation = NULL" 
+
+    if updatePostDetailsDto["timelineProjectInformation"] is not None:
+        prefixQuery += ", timelineProjectInformation = '{}'".format(updatePostDetailsDto["timelineProjectInformation"])
+    else:
+        prefixQuery += ", timelineProjectInformation = NULL"
     
-    prefixQuery += """,objectivesProjectInformation = '{0}', methodologyProjectInformation = '{1}',datasetProjectInformation = '{2}',timelineProjectInformation = '{3}' WHERE Id = {4}""".format(updatePostDetailsDto["objectivesProjectInformation"],updatePostDetailsDto["methodologyProjectInformation"],updatePostDetailsDto["datasetProjectInformation"],updatePostDetailsDto["timelineProjectInformation"], postId) 
+    
+    # prefixQuery += """,objectivesProjectInformation = '{0}', methodologyProjectInformation = '{1}',datasetProjectInformation = '{2}',timelineProjectInformation = '{3}' WHERE Id = {4}""".format(updatePostDetailsDto["objectivesProjectInformation"],updatePostDetailsDto["methodologyProjectInformation"],updatePostDetailsDto["datasetProjectInformation"],updatePostDetailsDto["timelineProjectInformation"], postId) 
+    prefixQuery += """ WHERE Id = {}""".format(postId) 
     return prefixQuery
 
 def generateInsertNotificationQuery(createNotificationDto):
@@ -165,4 +195,18 @@ def generateInsertUserIsNotifiedByNotificationQuery(notificationReponseDto,userI
         postfixQuery = "({0},{1}),".format(notificationReponseDto["id"],userId)
         prefixQuery += postfixQuery
     query = prefixQuery[0:-1]
+    return query
+
+def generateInsertInsertProjectParticipationQuery(createParticipantForProjectDto,postId):
+    prefixQuery = "INSERT INTO projects_has_users (postId,userId "
+    postfixQuery = "VALUES ({0},{1}".format(postId,createParticipantForProjectDto["userId"]) 
+
+    for key in createParticipantForProjectDto:
+        if key == "contributionDescription" and createParticipantForProjectDto["contributionDescription"] is not None:
+            prefixQuery += ",contributionDescription "
+            postfixQuery += ",'{}' ".format(createParticipantForProjectDto["contributionDescription"])
+        if key == "position" and createParticipantForProjectDto["position"] is not None:
+            prefixQuery += ",position "
+            postfixQuery += ",'{}' ".format(createParticipantForProjectDto["position"])
+    query = prefixQuery + ")" + postfixQuery + ")"
     return query
