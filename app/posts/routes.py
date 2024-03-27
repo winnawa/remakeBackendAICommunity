@@ -203,13 +203,13 @@ def getPosts():
             if key == "postType" :
                 if not isFirstParam:
                     queryString += " and "
+                isFirstParam = False
                 queryString += """postType = '{}' """.format(postType)    
             if key == "creatorId":
                 if not isFirstParam:
                     queryString += " and "
-                queryString += """creatorId = {} """.format(creatorId)  
-            if isFirstParam:
                 isFirstParam = False
+                queryString += """creatorId = {} """.format(creatorId)  
     queryString += """ORDER BY Id DESC""" 
 
     print(queryString)
