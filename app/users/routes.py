@@ -271,6 +271,8 @@ def searchPostsByQuery(userId):
 @bp.route('/<userId>/otherUsers', methods=['GET'])
 def searchOtherUsersByQuery(userId):
     queryString = request.args.get('queryString')
+    if queryString is None:
+        queryString = ""
     postId = request.args.get('postId')
 
     contextQuery = ""
