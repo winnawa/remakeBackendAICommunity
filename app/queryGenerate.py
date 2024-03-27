@@ -39,7 +39,11 @@ def generateInsertPostQuery(createPostDto):
     prefixQuery = "INSERT INTO posts ("
     postfixQuery = ") VALUES ("
     for key in createPostDto:
+        if createPostDto[key] is None:
+            continue
+        
         prefixQuery = prefixQuery + key + ", "
+      
         if key == "creatorId":
             postfixQuery = postfixQuery + "{0}".format(createPostDto[key]) + ", "
         else:
