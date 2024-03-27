@@ -29,7 +29,7 @@ def generateInsertUserExperienceQuery(userId, experiences):
     for experience in experiences:
         description = experience["experienceDescription"]
         timeline = experience["timeline"]
-        postfixQuery = postfixQuery + "({0},'{1}','{2}')".format(userId, description, timeline) + ", "
+        postfixQuery = postfixQuery + """({0},"{1}","{2}")""".format(userId, description, timeline) + ", "
     
     query = prefixQuery + postfixQuery[:-2]
 
