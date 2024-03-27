@@ -61,8 +61,11 @@ def createNotification():
 
 @bp.route('/', methods=['GET'])
 def getNotifications():
+
+    userId = int(request.args.get('userId')) if request.args.get('userId') is not None else 1
+   
     # need to take in DESC order
-    curr.execute("""SELECT * FROM notifications ORDER BY createdTime DESC""")
+    curr.execute("""SELECT * FROM notifications AS N JOIN user_is_notified_by_notification AS UINBN ON N.Id = UINBN.NotificationId WHERE UINBN.UserId = {} ORDER BY createdTime DESC""".format(userId))
     notificationDataModels = curr.fetchall()
     notificationsReponseDto = FromNotificationDataModelsToNotificationsReponseDto(notificationDataModels)
 

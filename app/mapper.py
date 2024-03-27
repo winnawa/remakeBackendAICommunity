@@ -80,7 +80,7 @@ def FromPostResponseDtoToElasticSearchModel(postReponseDto):
     postTypeValue = str(postReponseDto['postType']) if 'postType' in postReponseDto else PostType.project.value    
     postTypeName = PostType(str(postReponseDto["postType"])).name if "postType" in postReponseDto else PostType.project.name
 
-    return {
+    elasticSearchModel = {
         'content' : postContent,
         'meta' : {
             'id' : str(postReponseDto['id']),
@@ -89,6 +89,11 @@ def FromPostResponseDtoToElasticSearchModel(postReponseDto):
         },
         'id': "{0}_{1}".format(postTypeName, postReponseDto['id'])
     }
+
+    if "participants" in postReponseDto and postReponseDto["participants"] is not None and postTypeValue == PostType.project.value:
+        elasticSearchModel["meta"]["participants"] = []
+
+    return elasticSearchModel
 
 def FromUserResponseDtoToElasticSearchModel(userReponseDto):
     userContent = ""

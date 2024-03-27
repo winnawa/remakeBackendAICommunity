@@ -284,7 +284,7 @@ Data Preprocessing: Clean and preprocess the FAQ data by removing noise, tokeniz
 users = [
     {
         'id': 'userProfile_1',
-        'content': """A user who has skills in :Machine Learning, Deep Learning, Keras, Natural Language Processing, Python.
+        'content': """Username is namkhoa.A user who has skills in :Machine Learning, Deep Learning, Keras, Natural Language Processing, Python.
                         User works as a Software Engineer at VinAI in spearheadeding the development of a machine learning model that improved our product recommendation system, resulting in a 20% increase in user engagement. 
                         User also collaborated with the data engineering team to streamline our data pipeline, enhancing the efficiency of our model training process.As a Senior AI Engineer at VinAI, User led a team that built a robust AI platform that supported multiple machine learning and deep learning models. 
                         This platform enabled the company to rapidly prototype and deploy new AI features.User works as a Product Manager at VinAI in leading the successful launch of an AI-powered customer service chatbot, which improved customer response times by 30% and increased customer satisfaction scores.""",
@@ -296,7 +296,7 @@ users = [
     },
     {
         'id': 'userProfile_2',
-        'content': """A user who has skills in :Deep Learning, Keras, Pandas, Numpy.User, as a Deep Learning Specialist at VinAI, developed a neural network model that improved the accuracy of the company's image recognition software by 30%. They also wrote a technical paper on their work that was published in a top-tier AI conference.""",
+        'content': """Username is namkhoaphamnguyen.A user who has skills in :Deep Learning, Keras, Pandas, Numpy.User, as a Deep Learning Specialist at VinAI, developed a neural network model that improved the accuracy of the company's image recognition software by 30%. They also wrote a technical paper on their work that was published in a top-tier AI conference.""",
         'meta' : {
             'id' : '2',
             'postType' : '1',
@@ -305,7 +305,7 @@ users = [
     },
     {
         'id': 'userProfile_3',
-         'content': """User, as a Deep Learning Specialist at VinAI, developed a neural network model that improved the accuracy of the company's image recognition software by 30%. They also wrote a technical paper on their work that was published in a top-tier AI conference.""",
+        'content': """Username is kienvo.User, in their role as a Machine Learning Engineer at VinAI, designed an anomaly detection system that reduced fraudulent transactions by 25%. They also optimized the company's machine learning infrastructure, reducing model training time by 40%.""",
         'meta' : {
             'id' : '3',
             'postType' : '1',
@@ -314,7 +314,7 @@ users = [
     },
     {
         'id': 'userProfile_4',
-         'content': """In their role as an AI Analyst at VinAI, User conducted thorough market research and data analysis that informed the companyss AI strategy. Their insights led to the successful launch of three new AI products.At VinAI, User held the position of AI Architect and designed the architecture for a distributed AI system that allowed for faster processing of large datasets. This resulted in a 50% reduction in data processing times.User works as an AI Consultant at VinAI, helped clients implement AI solutions that increased operational efficiency by 35%. They also provided training to clients' staff on how to use and maintain these AI systems.""",
+        'content': """Username is namkhoapham.User works as an AI Consultant at VinAI, helped clients implement AI solutions that increased operational efficiency by 35%. They also provided training to clients’ staff on how to use and maintain these AI systems.At VinAI, User held the position of AI Architect and designed the architecture for a distributed AI system that allowed for faster processing of large datasets. This resulted in a 50% reduction in data processing times.""",
         'meta' : {
             'id' : '4',
             'postType' : '1',
@@ -323,7 +323,7 @@ users = [
     },
     {
         'id': 'userProfile_5',
-        'content': """In their role as an AI Analyst at VinAI, User conducted thorough market research and data analysis that informed the companyss AI strategy, publishing a model that can detect the malfunctioning body part of the human, thus treating the health problem before it becomes serious  . Their insights led to the successful launch of three new AI products.At VinAI, User held the position of AI Architect and designed the architecture for a distributed AI system that allowed for faster processing of large datasets.User works as an AI Consultant at VinAI, helped clients implement AI solutions that increased operational efficiency by 35%.""",
+        'content': """Username is anhkhoapham.In their role as an AI Analyst at VinAI, User conducted thorough market research and data analysis that informed the companyss AI strategy, publishing a model that can detect the malfunctioning body part of the human, thus treating the health problem before it becomes serious  . Their insights led to the successful launch of three new AI products.""",
         'meta' : {
             'id' : '5',
             'postType' : '1',
@@ -334,7 +334,6 @@ users = [
 
 
 
-
 postsSqlite = [
     {
         'id': 'project_1',
@@ -342,7 +341,8 @@ postsSqlite = [
         'meta' : {
             'id' : '1',
             'postType' : '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -351,7 +351,8 @@ postsSqlite = [
         'meta' : {
             'id' : '2',
             'postType' : '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -360,7 +361,8 @@ postsSqlite = [
         'meta' : {
             'id' : '3',
             'postType' : '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -369,7 +371,8 @@ postsSqlite = [
         'meta' : {
             'id' : '4',
             'postType' : '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -378,7 +381,8 @@ postsSqlite = [
         'meta' : {
             'id' : '5',
             'postType' : '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -387,7 +391,8 @@ postsSqlite = [
         'meta' : {
             'id' : '6',
             'postType' : '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -396,7 +401,8 @@ postsSqlite = [
         'meta' : {
             'id' : '7',
             'postType' : '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -405,7 +411,8 @@ postsSqlite = [
         'meta' : {
             'id' : '9',
             'postType': '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -414,7 +421,8 @@ postsSqlite = [
         'meta' : {
             'id' : '10',
             'postType': '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -423,7 +431,8 @@ postsSqlite = [
         'meta' : {
             'id' : '11',
             'postType': '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -432,7 +441,8 @@ postsSqlite = [
         'meta' : {
             'id' : '12',
             'postType': '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -441,7 +451,8 @@ postsSqlite = [
         'meta' : {
             'id' : '13',
             'postType': '0',
-            'creatorId': '2'
+            'creatorId': '2',
+            'participants': []
         }
     },
     {
@@ -451,7 +462,8 @@ postsSqlite = [
         'meta' : {
             'id' : '14',
             'postType': '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -461,7 +473,8 @@ Data Preprocessing: Clean and preprocess the FAQ data by removing noise, tokeniz
         'meta' : {
             'id' : '15',
             'postType': '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -470,7 +483,8 @@ Data Preprocessing: Clean and preprocess the FAQ data by removing noise, tokeniz
         'meta' : {
             'id' : '16',
             'postType': '0',
-            'creatorId': '1'
+            'creatorId': '1',
+            'participants': []
         }
     },
     {
@@ -479,7 +493,7 @@ Data Preprocessing: Clean and preprocess the FAQ data by removing noise, tokeniz
         'meta' : {
             'id' : '17',
             'postType': '2',
-            'creatorId': '1'
+            'creatorId': '1',
         }
     }
 ]

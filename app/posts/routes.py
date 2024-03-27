@@ -47,6 +47,19 @@ def createPost():
         skillsDetailReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postSkillJoinSkillDataModels)
         postReponseDto["skills"] = skillsDetailReponseDto
 
+    # add-on participants
+    if postReponseDto["postType"] == PostType.event.value:
+        curr.execute("""SELECT * FROM events_has_users AS EHU JOIN users AS U ON EHU.userId = U.Id WHERE EHU.postId = {0}""".format(postReponseDto["id"]))
+        eventPostHasUserJoinsUserDataModels = curr.fetchall()
+        participantsReponseDto = FromEventPostHasUserJoinsUserDataModelsToEventParticipantsResponseDto(eventPostHasUserJoinsUserDataModels)
+        postReponseDto['participants'] = participantsReponseDto
+  
+    if postReponseDto["postType"] == PostType.project.value:
+        curr.execute("""SELECT * FROM projects_has_users AS PHU JOIN users AS U ON PHU.userId = U.Id WHERE PHU.postId = {0}""".format(postReponseDto["id"]))
+        projectPostHasUserJoinsUserDataModels = curr.fetchall()
+        participantsReponseDto = FromProjectPostHasUserJoinsUserDataModelsToProjectParticipantsResponseDto(projectPostHasUserJoinsUserDataModels)
+        postReponseDto['participants'] = participantsReponseDto
+
     # index to elasticsearch
     postElasticSearchModel = FromPostResponseDtoToElasticSearchModel(postReponseDto)
     AutoMatching.indexNewData([postElasticSearchModel])
