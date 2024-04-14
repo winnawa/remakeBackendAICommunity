@@ -224,6 +224,27 @@ def getPosts():
         paginatedPostDataModels = [postsDataModels[i] for i in range(startPoint,endPoint)]
         returnedPostsResponseDto = FromPostDataModelsToGetPostsResponseDto(paginatedPostDataModels)
 
+    for returnedPostResponseDto in returnedPostsResponseDto:
+        # add-on stars
+        curr.execute("""SELECT * FROM post_has_starts WHERE postId = {0}""".format(returnedPostResponseDto["id"]))
+        postHasStarDataModels = curr.fetchall()
+        starsReponseDto = FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels)
+
+        returnedPostResponseDto['stars'] = starsReponseDto
+    
+        # add-on participants
+        if returnedPostResponseDto["postType"] == PostType.event.value:
+            curr.execute("""SELECT * FROM events_has_users AS EHU JOIN users AS U ON EHU.userId = U.Id WHERE EHU.postId = {0}""".format(returnedPostResponseDto["id"]))
+            eventPostHasUserJoinsUserDataModels = curr.fetchall()
+            participantsReponseDto = FromEventPostHasUserJoinsUserDataModelsToEventParticipantsResponseDto(eventPostHasUserJoinsUserDataModels)
+            returnedPostResponseDto['participants'] = participantsReponseDto
+    
+        if returnedPostResponseDto["postType"] == PostType.project.value:
+            curr.execute("""SELECT * FROM projects_has_users AS PHU JOIN users AS U ON PHU.userId = U.Id WHERE PHU.postId = {0}""".format(returnedPostResponseDto["id"]))
+            projectPostHasUserJoinsUserDataModels = curr.fetchall()
+            participantsReponseDto = FromProjectPostHasUserJoinsUserDataModelsToProjectParticipantsResponseDto(projectPostHasUserJoinsUserDataModels)
+            returnedPostResponseDto['participants'] = participantsReponseDto
+
     return json.dumps({"message": "get posts success", "posts":returnedPostsResponseDto}), 200, {'ContentType':'application/json'}
 
 @bp.route('/<postId>', methods=['GET'])
