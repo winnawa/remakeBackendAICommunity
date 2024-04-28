@@ -232,7 +232,7 @@ def searchPostsByQuery(userId):
             curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
             postDataModel = curr.fetchone()
             if postDataModel is None:
-                return json.dumps({"message": "post not found{}".format(postId)}), 404, {'ContentType':'application/json'}
+                return json.dumps({"message": "post not found {}".format(postId)}), 404, {'ContentType':'application/json'}
             
             postReponseDto = FromPostDataModelToPostResponseDto(postDataModel)
 

@@ -9,19 +9,21 @@ from app.mapper import PostType
 ELASTIC_PASSWORD = "<password>"
 
 document_store = ElasticsearchDocumentStore(
-    host = "174.129.61.40",
+    host = "3.81.47.159",
     port = 9200,
     username="elasticsearch",
     password= ELASTIC_PASSWORD,
+    embedding_dim=384
 )
 
 class AutoMatching:
     document_store = document_store
     embeddingRetriever = EmbeddingRetriever(
         document_store=document_store,
-        embedding_model="sentence-transformers/all-mpnet-base-v2",
+        embedding_model="sentence-transformers/all-MiniLM-L6-v2",
         model_format="sentence_transformers",
         scale_score= False
+        
     )
 
     @staticmethod
@@ -62,12 +64,7 @@ class AutoMatching:
         #     }
         # )
 
-        embeddingRetriever = EmbeddingRetriever(
-            document_store=document_store,
-            embedding_model="sentence-transformers/all-mpnet-base-v2",
-            model_format="sentence_transformers",
-            scale_score= False
-        )
+        embeddingRetriever = AutoMatching.embeddingRetriever
         embeddingRetrieverPipeline = Pipeline()
         embeddingRetrieverPipeline.add_node(component=embeddingRetriever, name="Retriever", inputs=["Query"])
         embeddingRetrieverPipelineOutput = embeddingRetrieverPipeline.run(
@@ -96,7 +93,7 @@ class AutoMatching:
         if len(retrieverOutput) == 0:
             return None
 
-        ranker = SentenceTransformersRanker(model_name_or_path="cross-encoder/ms-marco-MiniLM-L-6-v2")
+        ranker = SentenceTransformersRanker(model_name_or_path="cross-encoder/ms-marco-TinyBERT-L-2-v2")
         retrieverRankerPipeline = Pipeline()
         retrieverRankerPipeline.add_node(component=ranker, name="Ranker", inputs=["Query"])
         result = retrieverRankerPipeline.run(
@@ -110,12 +107,7 @@ class AutoMatching:
     def searchRelatedDocuments(inputQuery, filterParam):
         userInput = inputQuery
 
-        embeddingRetriever = EmbeddingRetriever(
-            document_store=document_store,
-            embedding_model="sentence-transformers/all-mpnet-base-v2",
-            model_format="sentence_transformers",
-            scale_score= False
-        )
+        embeddingRetriever = AutoMatching.embeddingRetriever
         embeddingRetrieverPipeline = Pipeline()
         embeddingRetrieverPipeline.add_node(component=embeddingRetriever, name="Retriever", inputs=["Query"])
         result = embeddingRetrieverPipeline.run(
