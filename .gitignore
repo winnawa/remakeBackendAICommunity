@@ -1,3 +1,5 @@
 virtualEnvAICommunityBackend
 virtualEnvRemakeBackendAIComm
 **/__pycache__
+.idea
+virtualEnv

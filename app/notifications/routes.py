@@ -7,8 +7,10 @@ from app.queryGenerate import generateInsertNotificationQuery, generateInsertUse
 from dataConnection import curr, conn
 from app.socketConnection import socketio
 from datetime import datetime
+from flask_cors import cross_origin
 
-@bp.route('/', methods=['POST'])
+@bp.route('/post', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def createNotification():
     request_data = request.get_json()
     createNotificationDto = {}
