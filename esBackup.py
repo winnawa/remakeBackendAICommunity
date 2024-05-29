@@ -305,7 +305,7 @@ users = [
     },
     {
         'id': 'userProfile_3',
-        'content': """Username is kienvo.User, in their role as a Machine Learning Engineer at VinAI, designed an anomaly detection system that reduced fraudulent transactions by 25%. They also optimized the company's machine learning infrastructure, reducing model training time by 40%.""",
+        'content': """Username is kienvo.A user who has skills in :Machine Learning, Python, Numpy.User, in their role as a Machine Learning Engineer at VinAI, designed an anomaly detection system that reduced fraudulent transactions by 25%. They also optimized the company's machine learning infrastructure, reducing model training time by 40%.""",
         'meta' : {
             'id' : '3',
             'postType' : '1',
@@ -314,7 +314,7 @@ users = [
     },
     {
         'id': 'userProfile_4',
-        'content': """Username is namkhoapham.User works as an AI Consultant at VinAI, helped clients implement AI solutions that increased operational efficiency by 35%. They also provided training to clients’ staff on how to use and maintain these AI systems.At VinAI, User held the position of AI Architect and designed the architecture for a distributed AI system that allowed for faster processing of large datasets. This resulted in a 50% reduction in data processing times.""",
+        'content': """Username is namkhoapham.A user who has skills in :Numpy, Keras, Natural Language Processing.User works as an AI Consultant at VinAI, helped clients implement AI solutions that increased operational efficiency by 35%. They also provided training to clients’ staff on how to use and maintain these AI systems.At VinAI, User held the position of AI Architect and designed the architecture for a distributed AI system that allowed for faster processing of large datasets. This resulted in a 50% reduction in data processing times.""",
         'meta' : {
             'id' : '4',
             'postType' : '1',
@@ -323,7 +323,7 @@ users = [
     },
     {
         'id': 'userProfile_5',
-        'content': """Username is anhkhoapham.In their role as an AI Analyst at VinAI, User conducted thorough market research and data analysis that informed the companyss AI strategy, publishing a model that can detect the malfunctioning body part of the human, thus treating the health problem before it becomes serious  . Their insights led to the successful launch of three new AI products.""",
+        'content': """Username is anhkhoapham.A user who has skills in :Natural Language Processing, PyTorch, Python.In their role as an AI Analyst at VinAI, User conducted thorough market research and data analysis that informed the companyss AI strategy, publishing a model that can detect the malfunctioning body part of the human, thus treating the health problem before it becomes serious  . Their insights led to the successful launch of three new AI products.""",
         'meta' : {
             'id' : '5',
             'postType' : '1',
