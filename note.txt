@@ -1,0 +1,30 @@
+
+Query ElasticSearch
+
+GET /_cat/indices
+
+GET document/_search
+{
+    "query": {
+        "match_all": {}
+    }
+}
+GET /document/_search
+{
+    "query": {
+        "match": {
+            "id": "3"
+        }
+    }
+}
+
+POST /document/_delete_by_query
+{
+  "query": {
+    "match": {
+      "postType": "1"
+    }
+  }
+}
+
+

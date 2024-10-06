@@ -9,19 +9,21 @@ from app.mapper import PostType
 ELASTIC_PASSWORD = "<password>"
 
 document_store = ElasticsearchDocumentStore(
-    host = "54.89.121.175",
+    host = "18.209.105.61",
     port = 9200,
     username="elasticsearch",
     password= ELASTIC_PASSWORD,
+    embedding_dim=384
 )
 
 class AutoMatching:
     document_store = document_store
     embeddingRetriever = EmbeddingRetriever(
         document_store=document_store,
-        embedding_model="sentence-transformers/all-mpnet-base-v2",
+        embedding_model="sentence-transformers/all-MiniLM-L6-v2",
         model_format="sentence_transformers",
         scale_score= False
+        
     )
 
     @staticmethod
@@ -39,12 +41,9 @@ class AutoMatching:
     @staticmethod
     def getDocumentById(postId, postType:PostType):
         document = None
-        if postType == PostType.project:
-            postId = int(postId)
-            document = AutoMatching.document_store.get_document_by_id("{0}_{1}".format(PostType.project.name, postId))
-        if postType == PostType.userProfile:
-            postId = int(postId)
-            document = AutoMatching.document_store.get_document_by_id("{0}_{1}".format(PostType.userProfile.name, postId))            
+
+        postId = int(postId)
+        document = AutoMatching.document_store.get_document_by_id("{0}_{1}".format(postType.name, postId))
 
         return document
     
@@ -65,12 +64,7 @@ class AutoMatching:
         #     }
         # )
 
-        embeddingRetriever = EmbeddingRetriever(
-            document_store=document_store,
-            embedding_model="sentence-transformers/all-mpnet-base-v2",
-            model_format="sentence_transformers",
-            scale_score= False
-        )
+        embeddingRetriever = AutoMatching.embeddingRetriever
         embeddingRetrieverPipeline = Pipeline()
         embeddingRetrieverPipeline.add_node(component=embeddingRetriever, name="Retriever", inputs=["Query"])
         embeddingRetrieverPipelineOutput = embeddingRetrieverPipeline.run(
@@ -87,6 +81,7 @@ class AutoMatching:
         
         # retrieverOutput = []
         retrieverOutput = embeddingRetrieverPipelineOutput['documents'] if embeddingRetrieverPipelineOutput['documents'] is not None else []
+        # retrieverOutput = [document for document in retrieverOutput if document.score > 0.6]
         # countList = []
         # for document in retrieverOutputWithDuplicate:
         #     if  document.meta['id'] not in countList:
@@ -98,7 +93,7 @@ class AutoMatching:
         if len(retrieverOutput) == 0:
             return None
 
-        ranker = SentenceTransformersRanker(model_name_or_path="cross-encoder/ms-marco-MiniLM-L-6-v2")
+        ranker = SentenceTransformersRanker(model_name_or_path="cross-encoder/ms-marco-TinyBERT-L-2-v2")
         retrieverRankerPipeline = Pipeline()
         retrieverRankerPipeline.add_node(component=ranker, name="Ranker", inputs=["Query"])
         result = retrieverRankerPipeline.run(
@@ -108,3 +103,33 @@ class AutoMatching:
 
         print(result)
         return result
+    
+    def searchRelatedDocuments(inputQuery, filterParam):
+        userInput = inputQuery
+
+        embeddingRetriever = AutoMatching.embeddingRetriever
+        embeddingRetrieverPipeline = Pipeline()
+        embeddingRetrieverPipeline.add_node(component=embeddingRetriever, name="Retriever", inputs=["Query"])
+        result = embeddingRetrieverPipeline.run(
+            query=userInput,
+            params={
+                "Retriever": {
+                    "top_k": 10
+                },
+                "filters": filterParam
+            }
+        )
+
+        # print(result)
+        # retrieverOutput = [document for document in retrieverOutput if document.score > 0.6]
+        return result
+
+    @staticmethod
+    def deleteDocument(postResponseDto):
+        
+        postTypeName = PostType(str(postResponseDto["postType"])).name if "postType" in postResponseDto else PostType.project.name
+        postId = "{0}_{1}".format(postTypeName,postResponseDto["id"])
+
+        indexName = "document",
+        ids= [postId]
+        document_store.delete_documents(index=indexName,ids=ids)

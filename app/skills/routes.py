@@ -2,7 +2,7 @@ from app.mapper import FromSkillDataModelsToGetSkillsResponseDto
 from app.skills import bp
 from flask import request
 import json
-from app.dataConnection import curr, conn
+from dataConnection import curr, conn
 
 # @bp.route('/', methods=['POST'])
 # def createPost():

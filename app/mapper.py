@@ -5,6 +5,12 @@ from enum import Enum
 class PostType(Enum):
     project = '0'
     userProfile = '1'
+    article = '2'
+    event = '3'
+
+class NotificationType(Enum):
+    projectCreation = '0'
+    friendRequest = '1'    
 
 def FromUserDataModelToUserResponseDto(userDataModel: tuple[Any, ...]):
     
@@ -44,7 +50,12 @@ def FromPostDataModelToPostResponseDto(postDataModel: tuple[Any, ...]):
         "objectivesProjectInformation": postDataModel[7],
         "methodologyProjectInformation": postDataModel[8],
         "datasetProjectInformation": postDataModel[9],
-        "timelineProjectInformation": postDataModel[10]
+        "timelineProjectInformation": postDataModel[10],
+        "postType": postDataModel[11],
+        "content": postDataModel[12],
+        "eventStartDate": postDataModel[13],
+        "isEventDisabled": postDataModel[14],
+        "imgUrl": postDataModel[15]
     }
     return postDto 
 
@@ -60,20 +71,29 @@ def FromPostResponseDtoToElasticSearchModel(postReponseDto):
         postContent = postContent + "Dataset Information: " + postReponseDto["datasetProjectInformation"]
     if postReponseDto["timelineProjectInformation"] is not None:
         postContent = postContent + "Project Timeline: " + postReponseDto["timelineProjectInformation"]
-    if postReponseDto["skills"] is not None and len(postReponseDto["skills"]) > 0:
+    if "skills" in postReponseDto and postReponseDto["skills"] is not None and len(postReponseDto["skills"]) > 0:
         skillsContent = ""
         for skill in postReponseDto["skills"]:
             skillsContent = skillsContent + skill["skillName"] + ", "
         postContent = postContent + "Skills: " + skillsContent[:-2] + "."
 
-    return {
+    postTypeValue = str(postReponseDto['postType']) if 'postType' in postReponseDto else PostType.project.value    
+    postTypeName = PostType(str(postReponseDto["postType"])).name if "postType" in postReponseDto else PostType.project.name
+
+    elasticSearchModel = {
         'content' : postContent,
         'meta' : {
             'id' : str(postReponseDto['id']),
-            'postType': PostType.project.value
+            'postType': postTypeValue,
+            'creatorId': str(postReponseDto["creatorId"])
         },
-        'id': "{0}_{1}".format(PostType.project.name, postReponseDto['id'])
+        'id': "{0}_{1}".format(postTypeName, postReponseDto['id'])
     }
+
+    if "participants" in postReponseDto and postReponseDto["participants"] is not None and postTypeValue == PostType.project.value:
+        elasticSearchModel["meta"]["participants"] = []
+
+    return elasticSearchModel
 
 def FromUserResponseDtoToElasticSearchModel(userReponseDto):
     userContent = ""
@@ -163,7 +183,12 @@ def FromPostDataModelsToGetPostsResponseDto(postDataModels: list[tuple[Any, ...]
             "objectivesProjectInformation": postDataModel[7],
             "methodologyProjectInformation": postDataModel[8],
             "datasetProjectInformation": postDataModel[9],
-            "timelineProjectInformation": postDataModel[10]
+            "timelineProjectInformation": postDataModel[10],
+            "postType": postDataModel[11],
+            "content": postDataModel[12],
+            "eventStartDate": postDataModel[13],
+            "isEventDisabled": postDataModel[14],
+            "imgUrl": postDataModel[15]
         }
         posts.append(postDto)
     return posts
@@ -211,3 +236,94 @@ def FromFriendshipJoinUserDataModelsToGetFriendsResponseDto(userJoinFriendshipJo
         friends.append(friendResponseModel)
     return friends
 
+def FromNotificationDataModelToNotificationReponseDto(notificationDataModel):
+    notificationResponseDto = {
+            "id": int(notificationDataModel[0]),
+            "createdTime": notificationDataModel[1],
+            "notificationDescription": notificationDataModel[2],
+            "type": int(notificationDataModel[3]),
+            "postId": int(notificationDataModel[4])
+        }
+    return notificationResponseDto   
+
+def FromNotificationDataModelsToNotificationsReponseDto(notificationDataModels):
+    notifications = []
+    for notificationDataModel in notificationDataModels:
+        notificationResponseDto = {
+                "id": int(notificationDataModel[0]),
+                "createdTime": notificationDataModel[1],
+                "notificationDescription": notificationDataModel[2],
+                "type": int(notificationDataModel[3]),
+                "postId": int(notificationDataModel[4])
+            }
+        notifications.append(notificationResponseDto)
+    return notifications 
+
+def FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels):
+    userId = []
+    for postHasStarDataModel in postHasStarDataModels:
+        print(postHasStarDataModel)
+        userId.append(postHasStarDataModel[2])
+    return userId
+
+def FromCommentDataModelToCommentReponseDto(commentDataModel):
+    commentResponseDto = {
+            "id": int(commentDataModel[0]),
+            "postId": int(commentDataModel[1]),
+            "userId": int(commentDataModel[2]),
+            "content": commentDataModel[3],
+            "createdTime": commentDataModel[4],
+            "username": commentDataModel[5]
+        }
+    return commentResponseDto   
+
+def FromCommentDataModelsToCommentsResponseDto(commentDataModels):
+    comments = []
+    for commentDataModel in commentDataModels:
+        commentResponseDto = {
+            "id": int(commentDataModel[0]),
+            "postId": int(commentDataModel[1]),
+            "userId": int(commentDataModel[2]),
+            "content": commentDataModel[3],
+            "createdTime": commentDataModel[4],
+            "username": commentDataModel[5]
+        }
+        comments.append(commentResponseDto)
+    return comments
+
+def FromEventPostHasUserJoinsUserDataModelsToEventParticipantsResponseDto(eventPostHasUserJoinsUserDataModels):
+    participants = []
+    for eventPostHasUserJoinsUserDataModel in eventPostHasUserJoinsUserDataModels:
+        participantResponseDto = {
+            "id": int(eventPostHasUserJoinsUserDataModel[3]),
+            "username": eventPostHasUserJoinsUserDataModel[4],
+            "email": eventPostHasUserJoinsUserDataModel[6]
+        }
+        participants.append(participantResponseDto)
+    return participants
+
+def FromParticipationDataModelToParticipationResponseDto(participationDataModel):
+    participationResponseDto = {
+            "id": int(participationDataModel[0]),
+            "postId": int(participationDataModel[1]),
+            "userId": int(participationDataModel[2]),
+            "contributionDescription": participationDataModel[3],
+            "position": participationDataModel[4]
+        }
+    return participationResponseDto 
+
+def FromProjectPostHasUserJoinsUserDataModelsToProjectParticipantsResponseDto(projectPostHasUserJoinsUserDataModels):
+    participants = []
+    for projectPostHasUserJoinsUserDataModel in projectPostHasUserJoinsUserDataModels:
+        # print(projectPostHasUserJoinsUserDataModel)
+        participantResponseDto = {
+            "id": int(projectPostHasUserJoinsUserDataModel[0]),
+            "postId": int(projectPostHasUserJoinsUserDataModel[1]),
+            "userId": int(projectPostHasUserJoinsUserDataModel[2]),
+            "contributionDescription": projectPostHasUserJoinsUserDataModel[3],
+            "position": projectPostHasUserJoinsUserDataModel[4],
+            "username": projectPostHasUserJoinsUserDataModel[6],
+            "email": projectPostHasUserJoinsUserDataModel[8]
+        }
+        participants.append(participantResponseDto)
+    return participants

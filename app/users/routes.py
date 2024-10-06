@@ -4,8 +4,8 @@ from app.repoAbstraction import getDetailsUserResponseDto
 from app.users import bp
 from flask import request
 import json
-from app.dataConnection import curr, conn
-from app.mapper import FromExperienceDataModelsToExperiencesResponseDto, FromFriendshipJoinUserDataModelsToGetFriendsResponseDto, FromPostDataModelsToGetPostsResponseDto, FromSearchHistoryDataModelToCreateSearchHistoryResponseDto, FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto, FromUserContextDataToSystemContextQuery, FromUserDataModelToUserResponseDto, FromUserResponseDtoToElasticSearchModel, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
+from dataConnection import curr, conn
+from app.mapper import FromEventPostHasUserJoinsUserDataModelsToEventParticipantsResponseDto, FromExperienceDataModelsToExperiencesResponseDto, FromFriendshipJoinUserDataModelsToGetFriendsResponseDto, FromPostDataModelToPostResponseDto, FromPostDataModelsToGetPostsResponseDto, FromPostHasStarDataModelsToStarsResponseDto, FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto, FromProjectPostHasUserJoinsUserDataModelsToProjectParticipantsResponseDto, FromSearchHistoryDataModelToCreateSearchHistoryResponseDto, FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto, FromUserContextDataToSystemContextQuery, FromUserDataModelToUserResponseDto, FromUserResponseDtoToElasticSearchModel, FromUserSkillJoinSkillDataModelsToSkillsDetailResponseDto, PostType
 
 @bp.route('/', methods=['POST'])
 def createUser():
@@ -26,6 +26,8 @@ def createUser():
     curr.execute("""SELECT * FROM users WHERE username = '{0}' """.format(createUserDto["username"]))
     userDataModel = curr.fetchone()
     userReponseDto = FromUserDataModelToUserResponseDto(userDataModel)
+      
+    userReponseDto = getDetailsUserResponseDto(userReponseDto, None, None, None)
 
     # index data to elastic search
     userElasticSearchModel = FromUserResponseDtoToElasticSearchModel(userReponseDto)
@@ -178,7 +180,10 @@ def updateUserExperiences(userId):
 @bp.route('/<userId>/posts', methods=['GET'])
 def searchPostsByQuery(userId):
     queryString = request.args.get('queryString')
+    if queryString is None:
+        queryString = ""
     isConsideringUserContext = (int(request.args.get('isConsideringUserContext')) if request.args.get('isConsideringUserContext') is not None else 0) == 1 #0 is false, 1 is true
+    postId = request.args.get('postId')
 
     curr.execute("""SELECT * FROM users WHERE Id = {0}""".format(userId))
     userDataModel = curr.fetchone()
@@ -198,34 +203,76 @@ def searchPostsByQuery(userId):
         contextQuery = FromUserContextDataToSystemContextQuery(userContextData)
 
     filterParam = {
-        "postType": PostType.project.value
+        "postType": PostType.project.value,
+        "creatorId": {"$ne": "{}".format(userId)}
     }
+
+    if postId is not None:
+        postId = int(postId)
+        document = AutoMatching.getDocumentById(postId, PostType.project)
+        if document is None:
+            document = AutoMatching.getDocumentById(postId, PostType.article)
+        if document is None:
+            document = AutoMatching.getDocumentById(postId, PostType.event)
+        if document is None:
+            return  json.dumps({"message": "no post matching postId"}), 400, {'ContentType':'application/json'}
+
+        queryString += document.content
+  
+        filterParam["id"]=  {"$ne": "{}".format(postId)}
+
     documents = AutoMatching.searchDocuments(queryString, contextQuery, filterParam)
     postIds= []
+    sortedGetPostResponseDto= []
+    
     if documents is not None:
         postIds = [int(document.meta['id']) for document in documents['documents']]
     
-        findPostsByIdsQueryString = generateFindPostsByIdsQueryString(postIds)
+        for postId in postIds:
+            curr.execute("""SELECT * FROM posts WHERE Id = {0}""".format(postId))
+            postDataModel = curr.fetchone()
+            if postDataModel is None:
+                return json.dumps({"message": "post not found {}".format(postId)}), 404, {'ContentType':'application/json'}
+            
+            postReponseDto = FromPostDataModelToPostResponseDto(postDataModel)
 
-        curr.execute(findPostsByIdsQueryString)
-        postDataModels = curr.fetchall()
+            # add-on skills
+            if postReponseDto["postType"] == PostType.project.value:
+                curr.execute("""SELECT * FROM posts_has_skills AS PHS JOIN skills AS S ON PHS.skillId = S.Id WHERE PHS.postId = {0}""".format(postId))
+                postHasSkillJoinsSkillDataModels = curr.fetchall()
+                skillsReponseDto = FromPostSkillJoinSkillDataModelsToSkillsDetailResponseDto(postHasSkillJoinsSkillDataModels)
 
-        getPostsResponseDto = FromPostDataModelsToGetPostsResponseDto(postDataModels)
+                postReponseDto['skills'] = skillsReponseDto
+        
+            # add-on stars
+            curr.execute("""SELECT * FROM post_has_starts WHERE postId = {0}""".format(postId))
+            postHasStarDataModels = curr.fetchall()
+            starsReponseDto = FromPostHasStarDataModelsToStarsResponseDto(postHasStarDataModels)
 
-    sortedGetPostResponseDto= []
-    orderPrecedence = [x for x in postIds]
-    while len(orderPrecedence) > 0:
-        for post in getPostsResponseDto:
-            if post["id"] == orderPrecedence[0]:
-                sortedGetPostResponseDto.append(post)
-                orderPrecedence.pop(0)
-                break
+            postReponseDto['stars'] = starsReponseDto
+        
+            # add-on participants
+            if postReponseDto["postType"] == PostType.event.value:
+                curr.execute("""SELECT * FROM events_has_users AS EHU JOIN users AS U ON EHU.userId = U.Id WHERE EHU.postId = {0}""".format(postId))
+                eventPostHasUserJoinsUserDataModels = curr.fetchall()
+                participantsReponseDto = FromEventPostHasUserJoinsUserDataModelsToEventParticipantsResponseDto(eventPostHasUserJoinsUserDataModels)
+                postReponseDto['participants'] = participantsReponseDto
+        
+            if postReponseDto["postType"] == PostType.project.value:
+                curr.execute("""SELECT * FROM projects_has_users AS PHU JOIN users AS U ON PHU.userId = U.Id WHERE PHU.postId = {0}""".format(postId))
+                projectPostHasUserJoinsUserDataModels = curr.fetchall()
+                participantsReponseDto = FromProjectPostHasUserJoinsUserDataModelsToProjectParticipantsResponseDto(projectPostHasUserJoinsUserDataModels)
+                postReponseDto['participants'] = participantsReponseDto
 
+            sortedGetPostResponseDto.append(postReponseDto)
+  
     return json.dumps({"message": "get posts success", "posts":sortedGetPostResponseDto}), 200, {'ContentType':'application/json'}
 
 @bp.route('/<userId>/otherUsers', methods=['GET'])
 def searchOtherUsersByQuery(userId):
     queryString = request.args.get('queryString')
+    if queryString is None:
+        queryString = ""
     postId = request.args.get('postId')
 
     contextQuery = ""
@@ -233,12 +280,28 @@ def searchOtherUsersByQuery(userId):
     if postId is not None:
         postId = int(postId)
         document = AutoMatching.getDocumentById(postId, PostType.project)
+        if document is None:
+            document = AutoMatching.getDocumentById(postId, PostType.article)
+        if document is None:
+            document = AutoMatching.getDocumentById(postId, PostType.event)
+        if document is None:
+            return  json.dumps({"message": "no post matching postId"}), 400, {'ContentType':'application/json'}
+
         contextQuery = document.content
   
     filterParam = {
         "postType": PostType.userProfile.value,
         "id": {"$ne": "{}".format(userId)}
     }
+    # exclude user from this project
+    if postId is not None:
+        excludeIds = document.meta["participants"] if "participants" in document.meta else []
+        print(excludeIds)
+        filterParam = {
+            "postType": PostType.userProfile.value,
+            "id": {"$nin": excludeIds}
+        }
+
     documents = AutoMatching.searchDocuments(queryString, contextQuery, filterParam)
     userIds= []
     sortedGetUserResponseDto= []
@@ -283,7 +346,7 @@ def getUserSearchHistory(userId):
     if userDataModel is None:
         return json.dumps({"message": "user not found"}), 404, {'ContentType':'application/json'}
 
-    curr.execute("""SELECT * FROM searchHistory WHERE userId = {0} """.format(userId))
+    curr.execute("""SELECT * FROM searchHistory WHERE userId = {0} ORDER BY Id DESC LIMIT 3""".format(userId))
     searchHistoryDataModels = curr.fetchall()
 
     createSearchHistoryReponseDto = FromSearchHistoryDataModelsToGetSearchHistoriesResponseDto(searchHistoryDataModels)
@@ -414,6 +477,7 @@ def getUserFriends(userId):
             # filter option here
             filterParam = {
                 "postType": PostType.userProfile.value,
+                # need to have friends in common
                 "friendIds": friendIds,
                 "id": {"$nin": excludeIds}
             }
